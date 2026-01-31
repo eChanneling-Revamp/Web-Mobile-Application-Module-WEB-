@@ -20,18 +20,21 @@ model activity_logs {
 }
 
 model agents {
-  id           String         @id
-  name         String
-  email        String         @unique
-  companyName  String?
-  phone        String?
-  address      String?
-  userId       String         @unique
-  isActive     Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime
-  users        users          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  appointments appointments[]
+  id                 String               @id
+  name               String
+  companyName        String?
+  email              String
+  phone              String?
+  address            String?
+  isActive           Boolean              @default(true)
+  userId             String               @unique
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  agent_appointments agent_appointments[]
+  agent_integrations agent_integrations[]
+  agent_payments     agent_payments[]
+  agent_reports      agent_reports[]
+  users              users                @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model appointments {
@@ -65,8 +68,7 @@ model appointments {
   updatedAt                      DateTime
   sessionId                      String
   medicalReportUrl               String?
-  agentId                        String
-  agents                         agents                           @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  agentId                        String?
   users                          users                            @relation(fields: [bookedById], references: [id])
   sessions                       sessions                         @relation(fields: [sessionId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   corporate_package_appointments corporate_package_appointments[]
@@ -76,6 +78,10 @@ model appointments {
 
   @@index([patientEmail], map: "idx_appointments_patient_email")
   @@index([status], map: "idx_appointments_status")
+  @@index([bookedById], map: "idx_appointments_bookedbyid")
+  @@index([createdAt], map: "idx_appointments_createdat")
+  @@index([sessionId], map: "idx_appointments_sessionid")
+  @@index([status, createdAt], map: "idx_appointments_status_createdat")
 }
 
 model audit_logs {
@@ -97,10 +103,10 @@ model audit_logs {
 
 model corporate_employees {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employeeId   String    @unique
-  hospitalName String
-  isActive     Boolean?  @default(true)
-  createdAt    DateTime? @default(now()) @db.Timestamp(6)
+  employeeid   String    @unique @db.VarChar(255)
+  hospitalname String    @db.VarChar(255)
+  isactive     Boolean?  @default(true)
+  createdat    DateTime? @default(now()) @db.Timestamp(6)
   users        users[]
 }
 
@@ -209,31 +215,39 @@ model doctor_hospitals {
   hospitals  hospitals @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
 
   @@unique([doctorId, hospitalId])
+  @@index([doctorId], map: "idx_doctor_hospitals_doctorid")
+  @@index([hospitalId], map: "idx_doctor_hospitals_hospitalid")
 }
 
 model doctors {
-  id               String             @id
-  name             String
-  email            String             @unique
-  specialization   String
-  qualification    String
-  experience       Int
-  phonenumber      String
-  consultationFee  Decimal            @db.Decimal(10, 2)
-  rating           Decimal?           @db.Decimal(3, 2)
-  profileImage     String?
-  description      String?
-  languages        String[]
-  availableDays    String[]
-  isActive         Boolean            @default(true)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime
-  status           doctor_status      @default(PENDING)
-  hospitalIds      String[]           @default([])
-  doctor_hospitals doctor_hospitals[]
-  prescriptions    prescriptions[]
-  sessions         sessions[]
-  time_slots       time_slots[]
+  id                 String               @id
+  name               String
+  email              String               @unique
+  specialization     String
+  qualification      String
+  experience         Int
+  phonenumber        String
+  consultationFee    Decimal              @db.Decimal(10, 2)
+  rating             Decimal?             @db.Decimal(3, 2)
+  profileImage       String?
+  description        String?
+  languages          String[]
+  availableDays      String[]
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  status             doctor_status        @default(PENDING)
+  hospitalIds        String[]             @default([])
+  agent_appointments agent_appointments[]
+  doctor_hospitals   doctor_hospitals[]
+  prescriptions      prescriptions[]
+  sessions           sessions[]
+  time_slots         time_slots[]
+
+  @@index([isActive], map: "idx_doctors_isactive")
+  @@index([name], map: "idx_doctors_name")
+  @@index([specialization], map: "idx_doctors_specialization")
+  @@index([status], map: "idx_doctors_status")
 }
 
 model export_jobs {
@@ -276,9 +290,12 @@ model hospitals {
   profileImage     String?
   hospitalType     String?
   doctor_hospitals doctor_hospitals[]
-  nurse_details    nurse_details[]
   nurses           nurses[]
   sessions         sessions[]
+
+  @@index([district], map: "idx_hospitals_district")
+  @@index([hospitalType], map: "idx_hospitals_hospitaltype")
+  @@index([name], map: "idx_hospitals_name")
 }
 
 model notification_logs {
@@ -310,7 +327,6 @@ model notifications {
   readAt    DateTime?
   data      Json?
   createdAt DateTime         @default(now())
-  agentId   String
   users     users            @relation(fields: [userId], references: [id])
 }
 
@@ -328,7 +344,6 @@ model nurse_details {
   updatedAt      DateTime
   age            Int?
   currentSession String?
-  hospitals      hospitals  @relation(fields: [hospitalId], references: [id])
   sessions       sessions[]
 }
 
@@ -349,6 +364,7 @@ model nurses {
   twoFactorMethod    String?
   twoFactorUpdatedAt DateTime?  @db.Date
   phone              String?    @db.VarChar(20)
+  username           String?
   age                String?
   hospitals          hospitals? @relation(fields: [hospitalId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "hospitalId")
 }
@@ -442,6 +458,7 @@ model patients {
   marked_no_show_at         DateTime? @db.Timestamp(6)
   no_show_reason            String?
   email                     String?   @db.VarChar(255)
+  dateOfBirth               DateTime  @db.Timestamp(6)
 
   @@unique([session_id, running_number])
   @@index([created_at], map: "idx_patients_created_at")
@@ -500,7 +517,6 @@ model refresh_tokens {
   userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())
-  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model reports {
@@ -540,17 +556,21 @@ model sessions {
   capacity             Int            @default(5)
   location             String
   hospitalId           String
-  status               String         @default("scheduled")
+  status               sessionstatus  @default(SCHEDULED)
   createdAt            DateTime       @default(now()) @db.Timestamp(6)
   scheduledAt          DateTime       @db.Timestamp(6)
-  startTime            DateTime?      @db.Timestamp(6)
-  endTime              DateTime?      @db.Timestamp(6)
-  currentRunningNumber String         @default("01")
+  startTime            DateTime       @db.Timestamp(6)
+  endTime              DateTime       @db.Timestamp(6)
+  currentRunningNumber String?
   duration             DateTime?      @db.Timestamp(6)
   appointments         appointments[]
   doctors              doctors        @relation(fields: [doctorId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "doctorId")
   hospitals            hospitals      @relation(fields: [hospitalId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "hospitalId")
   nurse_details        nurse_details  @relation(fields: [nurseId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "nurseId")
+
+  @@index([doctorId], map: "idx_sessions_doctor_id")
+  @@index([hospitalId], map: "idx_sessions_hospital_id")
+  @@index([scheduledAt], map: "idx_sessions_scheduled_at")
 }
 
 model support_tickets {
@@ -659,18 +679,21 @@ model users {
   lastLoginAt                                              DateTime?
   createdAt                                                DateTime             @default(now())
   updatedAt                                                DateTime
-  acceptedTerms                                            Boolean?
   nicNumber                                                String?
   passportNumber                                           String?
   nationality                                              String?
   userType                                                 String?
   title                                                    String?
-  packageId                                                String?
-  employeeId                                               String?
   isNumberVerified                                         Boolean?
   authUserId                                               String?              @unique @db.Uuid
   age                                                      Int?
   gender                                                   String?
+  medicalSpecs                                             String?
+  hospital                                                 String?
+  slmcNumber                                               Int?
+  employeeId                                               String?              @db.VarChar(255)
+  packageId                                                String?
+  acceptedTerms                                            Boolean?             @map("  acceptedTerms")
   activity_logs                                            activity_logs[]
   agents                                                   agents?
   appointments                                             appointments[]
@@ -679,14 +702,81 @@ model users {
   customers_customers_assignedAgentIdTousers               customers[]          @relation("customers_assignedAgentIdTousers")
   customers_customers_createdByIdTousers                   customers[]          @relation("customers_createdByIdTousers")
   notifications                                            notifications[]
-  refresh_tokens                                           refresh_tokens[]
   reports                                                  reports[]
   support_tickets_support_tickets_assignedAgentIdTousers   support_tickets[]    @relation("support_tickets_assignedAgentIdTousers")
   support_tickets_support_tickets_createdByIdTousers       support_tickets[]    @relation("support_tickets_createdByIdTousers")
   tasks                                                    tasks[]
   ticket_messages                                          ticket_messages[]
-  corporate_employees                                      corporate_employees? @relation(fields: [employeeId], references: [employeeId], map: "fk_users_corporate_employees")
-  packages                                                 packages?            @relation(fields: [packageId], references: [packageId], onDelete: Restrict, map: "fk_users_packages")
+  corporate_employees                                      corporate_employees? @relation(fields: [employeeId], references: [employeeid], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_corporate_employees")
+  packages                                                 packages?            @relation(fields: [packageId], references: [packageId], onDelete: Restrict, onUpdate: NoAction, map: "fk_users_packages")
+}
+
+model agent_appointments {
+  id             String                 @id
+  agentId        String
+  doctorId       String
+  patientName    String
+  patientNIC     String?
+  patientEmail   String
+  patientPhone   String
+  date           DateTime
+  timeSlot       String
+  status         AgentAppointmentStatus @default(PENDING)
+  amount         Float
+  paymentMethod  AgentPaymentMethod     @default(BILL_TO_PHONE)
+  sltPhoneNumber String?
+  employeeNIC    String?
+  notes          String?
+  cancelReason   String?
+  paymentId      String?                @unique
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime
+  agents         agents                 @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  doctors        doctors                @relation(fields: [doctorId], references: [id])
+  agent_payments agent_payments?        @relation(fields: [paymentId], references: [id])
+}
+
+model agent_integrations {
+  id         String    @id
+  agentId    String
+  name       String
+  provider   String
+  apiKey     String
+  secretKey  String?
+  config     Json?
+  isActive   Boolean   @default(true)
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime
+  agents     agents    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model agent_payments {
+  id                 String              @id
+  amount             Float
+  status             AgentPaymentStatus  @default(PENDING)
+  method             AgentPaymentMethod  @default(BILL_TO_PHONE)
+  transactionId      String?             @unique
+  agentId            String?
+  notes              String?
+  processedAt        DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime
+  agent_appointments agent_appointments?
+  agents             agents?             @relation(fields: [agentId], references: [id])
+}
+
+model agent_reports {
+  id         String          @id
+  agentId    String
+  type       AgentReportType
+  title      String
+  data       Json
+  parameters Json?
+  fileUrl    String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime
+  agents     agents          @relation(fields: [agentId], references: [id], onDelete: Cascade)
 }
 
 enum AppointmentStatus {
@@ -696,9 +786,6 @@ enum AppointmentStatus {
   NO_SHOW
   RESCHEDULED
   UNPAID
-  ABSENT
-  CALLED
-  SKIPPED
 }
 
 enum CommunicationMethod {
@@ -854,8 +941,45 @@ enum hospital_status {
 }
 
 enum session_status_list {
-  scheduled
-  ongoing
-  paused
-  ended
+  SCHEDULED
+  ONGOING
+  PAUSED
+  ENDED
+}
+
+enum AgentAppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum AgentPaymentMethod {
+  BILL_TO_PHONE
+  DEDUCT_FROM_SALARY
+}
+
+enum AgentPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum AgentReportType {
+  APPOINTMENTS
+  REVENUE
+  DOCTOR_PERFORMANCE
+  HOSPITAL_ANALYTICS
+  AGENT_PERFORMANCE
+  CUSTOM
+}
+
+enum sessionstatus {
+  SCHEDULED
+  PAUSED
+  ONGOING
+  ENDED
 }

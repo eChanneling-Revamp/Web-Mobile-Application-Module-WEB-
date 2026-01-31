@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         if (!isAllowed) {
             return NextResponse.json(
                 { error: "Too many signup attempts. Please try again later." },
-                { status: 429 }
+                { status: 429 },
             );
         }
 
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
                 const firstError = error.issues[0];
                 return NextResponse.json(
                     { error: firstError.message },
-                    { status: 400 }
+                    { status: 400 },
                 );
             }
             throw error;
@@ -46,12 +46,17 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error(
             "Signup error:",
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : "Unknown error",
         );
 
         return NextResponse.json(
-            { error: "Signup failed, please try again later." },
-            { status: 500 }
+            {
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : "Signup failed, please try again later.",
+            },
+            { status: 500 },
         );
     }
 }

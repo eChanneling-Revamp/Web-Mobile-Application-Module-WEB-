@@ -141,7 +141,7 @@ export async function GET(request: Request) {
                                   gte: startOfDay,
                                   lte: endOfDay,
                               },
-                              status: "scheduled",
+                              status: "SCHEDULED",
                           },
                           include: {
                               hospitals: true,

@@ -122,7 +122,7 @@ export async function updateBooking(id: string, data: any) {
             },
         });
 
-        if (!appoinment || appoinment.sessions.status !== "scheduled") {
+        if (!appoinment || appoinment.sessions.status !== "SCHEDULED") {
             throw new Error("Session not available for updates");
         }
 
@@ -154,7 +154,7 @@ export async function updatePaymentStatus(id: string) {
             },
         });
 
-        if (!appoinment || appoinment.sessions.status !== "scheduled") {
+        if (!appoinment || appoinment.sessions.status !== "SCHEDULED") {
             throw new Error("Session not available for updates");
         }
 
