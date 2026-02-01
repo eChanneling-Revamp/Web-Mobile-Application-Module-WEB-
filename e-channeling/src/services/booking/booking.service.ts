@@ -15,7 +15,6 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
             throw new Error("User not found. Please ensure you are logged in.");
         }
 
-
         // check session is still AVAILABLE
         const session = await tx.sessions.findUnique({
             where: { id: data.sessionId },
@@ -27,7 +26,6 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         if (!session || session.status !== "SCHEDULED") {
             throw new Error("Session not available");
         }
-
 
         // get all previous appointments for this patient
         const patientAppointments = await tx.appointments.findMany({
@@ -41,7 +39,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         const hasActiveBooking = patientAppointments.some(
             (activeBooking) =>
                 activeBooking.sessionId === data.sessionId &&
-                ["CONFIRMED"].includes(activeBooking.status)
+                ["CONFIRMED"].includes(activeBooking.status),
         );
 
         if (hasActiveBooking) {
@@ -64,18 +62,18 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
 
         if (newQueuePosition > session.capacity) {
             throw new Error(
-                "Session capacity reached. Cannot book more appointments."
+                "Session capacity reached. Cannot book more appointments.",
             );
         }
 
-        const userId = UUIDv4();
+        const appointmentId = UUIDv4();
         const appointmentNumber = generateAppointmentNumber();
         const consultationFee = session.doctors.consultationFee;
         const patientDateOfBirth = new Date(data.patientDateOfBirth);
 
         const appointment = await tx.appointments.create({
             data: {
-                id: userId,
+                id: appointmentId,
                 appointmentNumber: appointmentNumber,
                 bookedById: data.userId,
                 sessionId: data.sessionId,
@@ -87,7 +85,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
                 patientGender: data.patientGender,
                 patientDateOfBirth: patientDateOfBirth,
                 medicalReportUrl: data.medicalReport || null,
-                status: "UNPAID",
+                status: "CONFIRMED",
                 consultationFee: consultationFee,
                 totalAmount: consultationFee,
                 paymentStatus: "PENDING",
@@ -145,7 +143,8 @@ export async function updateBooking(id: string, data: any) {
 // update payment status
 export async function updatePaymentStatus(id: string) {
     return await prisma.$transaction(async (tx) => {
-        const appoinment = await tx.appointments.findUnique({
+        // First, verify the appointment exists
+        const appointment = await tx.appointments.findUnique({
             where: {
                 appointmentNumber: id,
             },
@@ -154,13 +153,25 @@ export async function updatePaymentStatus(id: string) {
             },
         });
 
-        if (!appoinment || appoinment.sessions.status !== "SCHEDULED") {
+        if (!appointment) {
+            throw new Error(`Appointment with number ${id} not found`);
+        }
+
+        if (appointment.sessions.status !== "SCHEDULED") {
             throw new Error("Session not available for updates");
         }
 
+        // Prevent duplicate payment updates
+        if (appointment.paymentStatus === "COMPLETED") {
+            throw new Error(
+                "Payment has already been completed for this appointment",
+            );
+        }
+
+        // Update the existing appointment record
         const updatedBooking = await tx.appointments.update({
             where: {
-                appointmentNumber: id,
+                id: appointment.id, // Use the primary key for the update to ensure we're updating the exact record
             },
             data: {
                 status: "CONFIRMED",
@@ -168,6 +179,7 @@ export async function updatePaymentStatus(id: string) {
                 updatedAt: new Date(),
             },
         });
+
         return updatedBooking;
     });
 }
