@@ -129,14 +129,19 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
 
         try {
             // Step 1: Create booking
-            const bookingResult = await dispatch(
-                createBooking({ userId })
-            ).unwrap();
+            // const bookingResult = await dispatch(
+            //     createBooking({ userId })
+            // ).unwrap();
 
             // Step 2: Process payment with the appointment number from booking
+
+            if (!confirmationData) {
+                throw new Error("No booking confirmation data available");
+            }
+            
             await dispatch(
                 processPayment({
-                    appointmentNumber: bookingResult.appointmentNumber,
+                    appointmentNumber: confirmationData.appointmentNumber,
                     amount: totalAmount,
                 })
             ).unwrap();

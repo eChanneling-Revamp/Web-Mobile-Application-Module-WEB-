@@ -9,6 +9,7 @@ import { ZodError } from "zod";
 
 export async function POST(request: Request) {
     try {
+        console.log("Payment Endpoint ")
         const body = await request.json();
 
         // rate limiting

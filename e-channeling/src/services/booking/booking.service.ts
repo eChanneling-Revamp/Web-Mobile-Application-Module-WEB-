@@ -91,7 +91,6 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
                 paymentStatus: "PENDING",
                 queuePosition: newQueuePosition,
                 updatedAt: new Date(),
-                agentId: "1fd2313d-7dab-438c-8d37-f85a3dcbf1a3",
             },
         });
 
