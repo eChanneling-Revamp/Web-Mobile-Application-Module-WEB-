@@ -171,7 +171,7 @@ export async function updatePaymentStatus(id: string) {
         // Update the existing appointment record
         const updatedBooking = await tx.appointments.update({
             where: {
-                id: appointment.id, // Use the primary key for the update to ensure we're updating the exact record
+                appointmentNumber: id, // Use the primary key for the update to ensure we're updating the exact record
             },
             data: {
                 status: "CONFIRMED",
