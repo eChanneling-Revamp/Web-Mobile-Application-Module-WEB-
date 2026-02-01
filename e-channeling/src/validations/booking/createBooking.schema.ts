@@ -5,9 +5,10 @@ const nicRegex = /^(?:\d{9}[vVxX]|\d{12})$/;
 export const bookingSchema = z.object({
     userId: z
         .string()
-        .min(1, "User ID is required")
         .max(255, "User ID must be less than 255 characters")
-        .trim(),
+        .trim()
+        .nullable()
+        .optional(),
 
     sessionId: z
         .string()
@@ -21,7 +22,7 @@ export const bookingSchema = z.object({
         .max(50, "Patient name must be less than 50 characters")
         .regex(
             /^[a-zA-Z\s'-]+$/,
-            "Patient name can only contain letters, spaces, hyphens and apostrophes"
+            "Patient name can only contain letters, spaces, hyphens and apostrophes",
         ),
 
     patientEmail: z
@@ -37,7 +38,7 @@ export const bookingSchema = z.object({
         .max(15, "Phone number must be less than 15 digits")
         .regex(
             /^\+?\d+$/,
-            "Phone number must contain only digits and optional + prefix"
+            "Phone number must contain only digits and optional + prefix",
         ),
 
     patientNIC: z
@@ -52,7 +53,7 @@ export const bookingSchema = z.object({
         .refine((date) => !isNaN(Date.parse(date)), "Invalid date")
         .refine(
             (date) => new Date(date) <= new Date(),
-            "Date of birth cannot be in the future"
+            "Date of birth cannot be in the future",
         ),
 
     patientGender: z.enum(["MALE", "FEMALE", "OTHER"], {

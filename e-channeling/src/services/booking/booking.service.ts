@@ -6,13 +6,19 @@ import { v4 as UUIDv4 } from "uuid";
 // create appointment
 export async function createBooking(data: Readonly<CreateBookingInput>) {
     return await prisma.$transaction(async (tx) => {
-        // Verify the user exists
-        const user = await tx.users.findUnique({
-            where: { id: data.userId },
-        });
 
-        if (!user) {
-            throw new Error("User not found. Please ensure you are logged in.");
+        // if userId is provided, verify user exists
+        if ( data.userId !== null ) {
+
+            const user = await tx.users.findUnique({
+                where: { id: data.userId },
+            });
+
+            if (!user) {
+                throw new Error(
+                    "User not found. Please ensure you are logged in.",
+                );
+            }
         }
 
         // check session is still AVAILABLE
@@ -75,7 +81,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
             data: {
                 id: appointmentId,
                 appointmentNumber: appointmentNumber,
-                bookedById: data.userId,
+                bookedById: data.userId || null,
                 sessionId: data.sessionId,
                 isNewPatient: newPatient,
                 patientName: data.patientName,

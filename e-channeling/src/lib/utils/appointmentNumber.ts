@@ -1,19 +1,10 @@
-/**
- * Generates a unique, industry-standard appointment number
- * Format: APT-YYYYMMDD-XXXXXX
- *
- * Components:
- * - APT: Prefix for appointment identification
- * - YYYYMMDD: Date component for chronological sorting and easy reference
- * - XXXXXX: 6-character alphanumeric code (Base36, excluding ambiguous chars)
- *
- * Features:
- * - Human-readable and easy to communicate over phone/email
- * - No ambiguous characters (0/O, 1/I/l excluded)
- * - Cryptographically random for security
- * - Approximately 1.5 billion combinations per character set
- *
- * Example: APT-20260201-H7K9M2
+/*
+  Format: APT-YYYYMMDD-XXXXXX
+  Example: APT-20260201-H7K9M2
+ 
+  APT: Prefix for appointment identification
+  YYYYMMDD: Date component for chronological sorting and easy reference
+  XXXXXX: 6-character alphanumeric code (Base36, excluding ambiguous chars)
  */
 export function generateAppointmentNumber(): string {
     const date = new Date();
@@ -27,7 +18,7 @@ export function generateAppointmentNumber(): string {
 
     // Generate 6-character unique code using crypto-quality randomness
     let uniqueCode = "";
-    const timestamp = Date.now().toString(36).toUpperCase().slice(-3); // Base36 timestamp component
+    const timestamp = Date.now().toString(36).toUpperCase().slice(-3);
 
     // Add timestamp-based characters (3 chars)
     uniqueCode += timestamp;
@@ -47,11 +38,7 @@ export function generateAppointmentNumber(): string {
     return `APT-${dateStr}-${uniqueCode}`;
 }
 
-/**
- * Validates appointment number format
- * @param appointmentNumber - The appointment number to validate
- * @returns boolean indicating if the format is valid
- */
+// Validates appointment number format
 export function validateAppointmentNumber(appointmentNumber: string): boolean {
     const pattern = /^APT-\d{8}-[234567689ABCDEFGHJKMNPQRSTUVWXYZ]{6}$/;
     return pattern.test(appointmentNumber);
