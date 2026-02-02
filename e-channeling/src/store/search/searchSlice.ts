@@ -38,7 +38,9 @@ export interface Doctor {
             name: string;
         };
     }>;
+
 }
+
 
 // Search filters interface
 export interface SearchFilters {

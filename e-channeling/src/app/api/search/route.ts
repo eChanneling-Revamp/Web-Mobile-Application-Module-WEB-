@@ -14,7 +14,7 @@ export async function GET(request: Request) {
                 {
                     error: "Too many search attempts. Please try again later.",
                 },
-                { status: 429 }
+                { status: 429 },
             );
         }
 
@@ -59,8 +59,9 @@ export async function GET(request: Request) {
         }
 
         if (specialtyId) {
+            const specialtySearch = specialtyId.split(" ")[0];
             whereClause.specialization = {
-                contains: specialtyId,
+                contains: specialtySearch,
                 mode: "insensitive",
             };
         }
@@ -100,11 +101,12 @@ export async function GET(request: Request) {
         }
 
         // Calculate date range once if date filter is provided
+        // Use UTC to avoid timezone offset issues
         let startOfDay, endOfDay;
         if (date) {
-            const searchDate = new Date(date);
-            startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));
-            endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
+            // Append UTC time to ensure correct date interpretation
+            startOfDay = new Date(date + "T00:00:00.000Z");
+            endOfDay = new Date(date + "T23:59:59.999Z");
 
             whereClause.sessions = {
                 some: {
@@ -112,7 +114,7 @@ export async function GET(request: Request) {
                         gte: startOfDay,
                         lte: endOfDay,
                     },
-                    status: "scheduled",
+                    status: "SCHEDULED",
                 },
             };
         }
@@ -161,7 +163,7 @@ export async function GET(request: Request) {
                 page: page,
                 totalPages: totalPages,
             },
-            { status: 200 }
+            { status: 200 },
         );
     } catch (error) {
         console.log(error);
@@ -174,7 +176,7 @@ export async function GET(request: Request) {
                         ? error.message
                         : "Unknown error occurred",
             },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
