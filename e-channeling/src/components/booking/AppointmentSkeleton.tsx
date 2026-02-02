@@ -16,7 +16,7 @@ export const AppointmentSkeleton = () => {
                         <aside className="rounded-2xl bg-gray-50 shadow-md p-5 h-fit">
                             <div className="flex flex-row sm:flex-col gap-3 mb-0.5 items-center sm:items-start">
                                 {/* Circular Image Placeholder */}
-                                <div className="p-4">
+                                <div className="p-4 flex justify-center w-full">
                                     <div className="w-20 h-20 rounded-full bg-gray-300"></div>
                                 </div>
                                 {/* Text Lines */}

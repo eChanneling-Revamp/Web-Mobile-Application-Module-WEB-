@@ -160,13 +160,21 @@ const BookingPage = ({ params }: PageProps) => {
                                             {doctorProfile.profileImage ? (
                                                 <img
                                                     src={
-                                                        doctorProfile.profileImage
+                                                        doctorProfile.profileImage 
+                                                       
                                                     }
                                                     alt={doctorProfile.name}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full bg-gray-300"></div>
+                                                <img
+                                                    src={
+                                                        "/sample-doctor-mini.png"
+                                                       
+                                                    }
+                                                    alt={doctorProfile.name}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             )}
                                         </div>
                                     </div>
@@ -225,13 +233,12 @@ const BookingPage = ({ params }: PageProps) => {
                                                         <div
                                                             className={`h-8 w-8 flex items-center justify-center rounded-full transition-all duration-200 border
                                                             text-[11px] font-bold shadow-sm
-                                                            ${
-                                                                isCompleted
+                                                            ${isCompleted
                                                                     ? "bg-green-500 border-green-500 text-white"
                                                                     : isActive
-                                                                      ? "bg-white border-blue-600 text-blue-600 shadow"
-                                                                      : "bg-gray-100 border-gray-300 text-gray-400"
-                                                            }
+                                                                        ? "bg-white border-blue-600 text-blue-600 shadow"
+                                                                        : "bg-gray-100 border-gray-300 text-gray-400"
+                                                                }
                                                         `}
                                                         >
                                                             {isCompleted ? (
@@ -257,24 +264,23 @@ const BookingPage = ({ params }: PageProps) => {
                                                         {/* Step Label */}
                                                         <span
                                                             className={`mt-0.5 text-[11px] font-medium text-center w-14 transition-colors duration-150 truncate
-                                                        ${
-                                                            isCompleted
-                                                                ? "text-green-700"
-                                                                : isActive
-                                                                  ? "text-blue-700"
-                                                                  : "text-gray-400"
-                                                        }`}
+                                                        ${isCompleted
+                                                                    ? "text-green-700"
+                                                                    : isActive
+                                                                        ? "text-blue-700"
+                                                                        : "text-gray-400"
+                                                                }`}
                                                             title={
                                                                 stepLabels[
-                                                                    stepNumber -
-                                                                        1
+                                                                stepNumber -
+                                                                1
                                                                 ]
                                                             }
                                                         >
                                                             {
                                                                 stepLabels[
-                                                                    stepNumber -
-                                                                        1
+                                                                stepNumber -
+                                                                1
                                                                 ]
                                                             }
                                                         </span>
@@ -283,13 +289,12 @@ const BookingPage = ({ params }: PageProps) => {
                                                     {i !== arr.length - 1 && (
                                                         <div className="flex items-center">
                                                             <div
-                                                                className={`h-0.5 w-5 rounded transition-colors duration-150 ${
-                                                                    isCompleted
-                                                                        ? "bg-green-400"
-                                                                        : isActive
-                                                                          ? "bg-blue-400"
-                                                                          : "bg-gray-200"
-                                                                }`}
+                                                                className={`h-0.5 w-5 rounded transition-colors duration-150 ${isCompleted
+                                                                    ? "bg-green-400"
+                                                                    : isActive
+                                                                        ? "bg-blue-400"
+                                                                        : "bg-gray-200"
+                                                                    }`}
                                                             />
                                                         </div>
                                                     )}
