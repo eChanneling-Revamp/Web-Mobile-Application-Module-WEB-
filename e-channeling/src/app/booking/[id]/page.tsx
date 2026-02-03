@@ -111,8 +111,6 @@ const BookingPage = ({ params }: PageProps) => {
             case 5:
                 return (
                     <StepConfirmation
-                        doctorName={doctorProfile?.name || ""}
-                        doctorFee={doctorProfile?.consultationFee || ""}
                         onBackHome={() => {
                             dispatch(resetBooking());
                             dispatch(setSelectedHospitalName(""))

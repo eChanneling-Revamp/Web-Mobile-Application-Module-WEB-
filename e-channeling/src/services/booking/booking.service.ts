@@ -8,7 +8,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
     return await prisma.$transaction(async (tx) => {
 
         // if userId is provided, verify user exists
-        if ( data.userId !== null ) {
+        if (data.userId !== null) {
 
             const user = await tx.users.findUnique({
                 where: { id: data.userId },
@@ -183,13 +183,42 @@ export async function updatePaymentStatus(id: string) {
                 paymentStatus: "COMPLETED",
                 updatedAt: new Date(),
             },
-        });
-
-        // add new field called session details and add some session details to the updatedBooking
-        Object.assign(updatedBooking, {
-            sessionDetails: {
-                sessionDate: appointment.sessions.scheduledAt,
-                sessionTime: appointment.sessions.startTime,
+            select: {
+                id: true,
+                appointmentNumber: true,
+                bookedById: true,
+                sessionId: true,
+                isNewPatient: true,
+                patientName: true,
+                patientEmail: true,
+                patientPhone: true,
+                patientNIC: true,
+                patientGender: true,
+                patientDateOfBirth: true,
+                medicalReportUrl: true,
+                status: true,
+                consultationFee: true,
+                totalAmount: true,
+                paymentStatus: true,
+                queuePosition: true,
+                createdAt: true,
+                updatedAt: true,
+                sessions: {
+                    select: {
+                        scheduledAt: true,
+                        startTime: true,
+                        doctors: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        hospitals: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 

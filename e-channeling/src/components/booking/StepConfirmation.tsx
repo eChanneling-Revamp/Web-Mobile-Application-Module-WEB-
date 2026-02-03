@@ -7,21 +7,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 interface StepConfirmationProps {
-    doctorName: string;
-    doctorFee: string;
     onBackHome: () => void;
 }
 
 export const StepConfirmation: React.FC<StepConfirmationProps> = ({
-    doctorName,
-    doctorFee,
     onBackHome,
 }) => {
     // Get confirmation data from Redux (set by createBooking thunk)
     const {
-        selectedHospitalName,
-        selectedDate,
-        selectedSessionStartTime,
         isCreatingBooking,
         isProcessingPayment,
         bookingError,
@@ -56,13 +49,13 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
         generateAppointmentReceipt({
             appointmentNumber: updateAppointment.appointmentNumber,
             appointmentId: updateAppointment.appointmentId,
-            hospitalName: selectedHospitalName || "N/A",
+            hospitalName: updateAppointment.sessions.hospitals.name,
             queuePosition: updateAppointment.queuePosition,
             patientName: updateAppointment.patientName,
             patientNIC: updateAppointment.patientNIC,
-            doctorName: doctorName,
-            sessionDate: updateAppointment.sessionDetails.sessionDate,
-            sessionTime: updateAppointment.sessionDetails.sessionTime,
+            doctorName: updateAppointment.sessions.doctors.name,
+            sessionDate: updateAppointment.sessions.scheduledAt,
+            sessionTime: updateAppointment.sessions.startTime,
             consultationFee: updateAppointment.consultationFee,
             platformFee: 200,
             paymentStatus: updateAppointment.paymentStatus,
@@ -156,7 +149,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Hospital:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {selectedHospitalName || "N/A"}
+                                {updateAppointment.sessions.hospitals.name}
                             </span>
                         </div>
 
@@ -196,7 +189,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Doctor Name:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {doctorName}
+                                {updateAppointment.sessions.doctors.name}
                             </span>
                         </div>
 
@@ -206,7 +199,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Date:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {formatDate(updateAppointment.sessionDetails.sessionDate)}
+                                {formatDate(updateAppointment.sessions.scheduledAt)}
                             </span>
                         </div>
 
@@ -216,7 +209,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Time:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {formatTime(updateAppointment.sessionDetails.sessionTime)}
+                                {formatTime(updateAppointment.sessions.startTime)}
                             </span>
                         </div>
 
