@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import {
     sessionsByDoctorId,
+    setSelectedHospitalName,
     setSelectedSessionId,
 } from "@/store/booking/bookingSlice";
 
@@ -286,9 +287,10 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                                         <button
                                             key={session.id}
                                             type="button"
-                                            onClick={() =>
+                                            onClick={() =>{
                                                 handleSessionSelect(session)
-                                            }
+                                                dispatch(setSelectedHospitalName(session.hospitals.name))
+                                            }}
                                             className={`rounded-xl border-2 border-gray-300 p-3 text-left transition-all duration-200 hover:shadow-lg  ${
                                                 isSelected
                                                     ? "border-green-500 bg-green-50 shadow-md ring-2 ring-green-200"

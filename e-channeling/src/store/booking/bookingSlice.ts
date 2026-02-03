@@ -3,14 +3,8 @@ import api from "@/lib/utils/api";
 import type {
     BookingState,
     Doctor,
-    Hospital,
-    AvailableDate,
-    SessionSlot,
-    SessionCard,
     CreateBookingRequest,
     CreateBookingResponse,
-    PaymentRequest,
-    PaymentResponse,
     Gender,
     Session,
     User,
@@ -64,14 +58,6 @@ const initialState: BookingState = {
     createBookingLoading: false,
     createBookingError: null,
 
-    // Step 4
-    paymentDetails: {
-        cardNumber: "",
-        cardHolderName: "",
-        expiryDate: "",
-        cvv: "",
-    },
-
     // Confirmation
     confirmationData: null,
 
@@ -81,7 +67,7 @@ const initialState: BookingState = {
 
     // Errors
     bookingError: null,
-    paymentError: null,
+
 };
 
 // Fetch doctor details by ID
@@ -215,62 +201,14 @@ export const createBooking = createAsyncThunk<
         } catch (error: any) {
             return rejectWithValue(
                 error.response?.data?.error ||
-                    error.message ||
-                    "Failed to create booking"
+                error.message ||
+                "Failed to create booking"
             );
         }
     }
 );
 
-// Process payment - INTEGRATED WITH BACKEND
-export const processPayment = createAsyncThunk<
-    PaymentResponse,
-    { appointmentNumber: string; amount: number },
-    { rejectValue: string }
->(
-    "booking/processPayment",
-    async ({ appointmentNumber, amount }, { getState, rejectWithValue }) => {
-        try {
-            const state = getState() as { booking: BookingState };
-            const { paymentDetails } = state.booking;
 
-            // Validate payment details
-            if (
-                !paymentDetails.cardNumber ||
-                !paymentDetails.cardHolderName ||
-                !paymentDetails.expiryDate ||
-                !paymentDetails.cvv
-            ) {
-                throw new Error("All payment details must be filled");
-            }
-
-            // Remove spaces from card number for backend
-            const cleanCardNumber = paymentDetails.cardNumber.replace(
-                /\s/g,
-                ""
-            );
-
-            const requestData: PaymentRequest = {
-                appointmentNumber,
-                amount,
-                cardNumber: cleanCardNumber,
-                cardHolderName: paymentDetails.cardHolderName,
-                expiryDate: paymentDetails.expiryDate,
-                cvv: paymentDetails.cvv,
-            };
-
-            const response = await api.post<PaymentResponse>(
-                "/payments",
-                requestData
-            );
-            return response.data;
-        } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.error || error.message || "Payment failed"
-            );
-        }
-    }
-);
 
 // ==================== SLICE ====================
 
@@ -331,23 +269,28 @@ const bookingSlice = createSlice({
             };
         },
 
-        // Step 4 actions
-        setPaymentDetails: (
-            state,
-            action: PayloadAction<Partial<BookingState["paymentDetails"]>>
-        ) => {
-            state.paymentDetails = {
-                ...state.paymentDetails,
-                ...action.payload,
-            };
-        },
-
         // Clear errors
         clearBookingError: (state) => {
             state.bookingError = null;
         },
-        clearPaymentError: (state) => {
-            state.paymentError = null;
+        // Clear booking success flag
+        clearBookingSuccess: (state) => {
+            state.isCreateBookingSuccess = false;
+        },
+
+        // Clear patient details
+        clearPatientDetails: (state) => {
+            state.patientDetails = {
+                fullName: "",
+                phone: "",
+                email: "",
+                nic: "",
+                dateOfBirth: "",
+                gender: "",
+                disease: "",
+            };
+            state.selectedSessionId = null;
+            state.forWhom = null;
         },
 
         // Reset booking
@@ -434,19 +377,6 @@ const bookingSlice = createSlice({
                 state.createBookingError =
                     action.payload || "Failed to create booking";
             })
-
-            // Process payment
-            .addCase(processPayment.pending, (state) => {
-                state.isProcessingPayment = true;
-                state.paymentError = null;
-            })
-            .addCase(processPayment.fulfilled, (state) => {
-                state.isProcessingPayment = false;
-            })
-            .addCase(processPayment.rejected, (state, action) => {
-                state.isProcessingPayment = false;
-                state.paymentError = action.payload || "Payment failed";
-            });
     },
 });
 
@@ -459,10 +389,10 @@ export const {
     setSelectedSessionCard,
     setForWhom,
     setPatientDetails,
-    setPaymentDetails,
     clearBookingError,
-    clearPaymentError,
+    clearBookingSuccess,
     resetBooking,
+    clearPatientDetails,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

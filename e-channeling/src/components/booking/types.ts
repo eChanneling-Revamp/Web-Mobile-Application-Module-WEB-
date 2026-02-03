@@ -152,14 +152,6 @@ export interface BookingState {
     createBookingLoading: boolean
     createBookingError: string | null
 
-    // Step 4 - Payment data
-    paymentDetails: {
-        cardNumber: string;
-        cardHolderName: string;
-        expiryDate: string; // MM/YY
-        cvv: string;
-    };
-
     // Confirmation data from backend
     confirmationData: CreateBookingResponse | null;
 
@@ -169,7 +161,6 @@ export interface BookingState {
 
     // Error states
     bookingError: string | null;
-    paymentError: string | null;
 }
 
 // API Request/Response types matching backend
@@ -200,6 +191,19 @@ export interface CreateBookingResponse {
         consultationFee: number;
         paymentStatus: PaymentStatus;
         queuePosition: number;
+}
+
+export interface PaymentState {
+    paymentDetails: {
+        cardNumber: string;
+        cardHolderName: string;
+        expiryDate: string;
+        cvv: string;
+    };
+    isProcessingPayment: boolean;
+    paymentError: string | null;
+    isPaymentSuccess: boolean;
+    updateAppointment: any;
 }
 
 export interface PaymentRequest {

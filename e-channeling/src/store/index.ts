@@ -6,6 +6,7 @@ import searchReducer from "@/store/search/searchSlice";
 import profileReducer from "./profile/profileSlice";
 import notificationReducer from "@/store/notifications/notificationSlice";
 import hospitalsReducer from "@/store/hospitals/hospitalsSlice";
+import paymentReducer from "@/store/payment/paymentSlice";
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         search: searchReducer,
         notifications: notificationReducer,
         hospitals: hospitalsReducer,
+        payment: paymentReducer,
     },
 });
 

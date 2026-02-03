@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import {
+    clearBookingSuccess,
+    clearPatientDetails,
     createBooking,
     fetchUserDetails,
     setPatientDetails,
@@ -136,9 +138,11 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
 
     useEffect(() => {
         if (isCreateBookingSuccess === true) {
+            dispatch(clearBookingSuccess());
+            dispatch(clearPatientDetails());
             onNext();
         }
-    }, [isCreateBookingSuccess]);
+    }, [isCreateBookingSuccess, dispatch, onNext]);
 
     console.log("patientDetails ", patientDetails);
 
@@ -204,10 +208,9 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${
-                                patientDetails.fullName
-                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${patientDetails.fullName
+                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.fullName ? "text-red-500" : ""}
                         `}
@@ -241,10 +244,9 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${
-                                patientDetails.nic
-                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${patientDetails.nic
+                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.nic ? "text-red-500" : ""}
                         `}
@@ -283,10 +285,9 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${
-                                patientDetails.phone
-                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${patientDetails.phone
+                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.phone ? "text-red-500" : ""}
                         `}
@@ -323,10 +324,9 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${
-                                patientDetails.email
-                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${patientDetails.email
+                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.email ? "text-red-500" : ""}
                         `}
@@ -404,10 +404,9 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${
-                                patientDetails.gender || touched.gender
-                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${patientDetails.gender || touched.gender
+                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.gender ? "text-red-500" : ""}
                         `}
@@ -439,10 +438,9 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                         text-gray-500 text-sm
                         transition-all duration-200
                         pointer-events-none
-                        ${
-                            patientDetails.disease
-                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                        ${patientDetails.disease
+                            ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                            : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                         }
                     `}
                 >

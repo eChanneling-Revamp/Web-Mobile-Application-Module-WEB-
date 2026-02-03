@@ -3,10 +3,9 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import {
-    setPaymentDetails,
     createBooking,
-    processPayment,
 } from "@/store/booking/bookingSlice";
+import { clearPaymentDetails, clearPaymentError, clearPaymentSuccess, processPayment, setPaymentDetails } from "@/store/payment/paymentSlice";
 
 interface StepPaymentProps {
     doctorFee: string;
@@ -25,13 +24,12 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
 
     // Get Redux state
     const {
-        paymentDetails,
         isCreatingBooking,
-        isProcessingPayment,
         bookingError,
-        paymentError,
         confirmationData,
     } = useSelector((state: RootState) => state.booking);
+
+    const { paymentDetails, isProcessingPayment, paymentError, isPaymentSuccess } = useSelector((state: RootState) => state.payment);
 
     // Track touched fields for validation
     const [touched, setTouched] = useState({
@@ -138,21 +136,34 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
             if (!confirmationData) {
                 throw new Error("No booking confirmation data available");
             }
-            
+
+
             await dispatch(
                 processPayment({
                     appointmentNumber: confirmationData.appointmentNumber,
                     amount: totalAmount,
+                    cardNumber: paymentDetails.cardNumber.replace(/\s/g, ""), // Remove spaces
+                    cardHolderName: paymentDetails.cardHolderName,
+                    expiryDate: paymentDetails.expiryDate,
+                    cvv: paymentDetails.cvv,
                 })
             ).unwrap();
 
-            // Success - move to confirmation
-            onNext();
+            
         } catch (error: any) {
             // Error is handled in Redux state
             console.error("Payment processing error:", error);
         }
     };
+
+    useEffect(() => {
+        if (isPaymentSuccess) {
+            dispatch(clearPaymentSuccess());
+            dispatch(clearPaymentError());
+            dispatch(clearPaymentDetails());
+            onNext();
+        }
+    }, [isPaymentSuccess]);
 
     const inputClass =
         "w-full rounded-xl border-2 border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200";
@@ -326,15 +337,15 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center justify-between pt-8">
-                <button
+            <div className="flex items-center justify-end pt-8">
+                {/* <button
                     type="button"
                     onClick={onPrev}
                     disabled={isCreatingBooking || isProcessingPayment}
                     className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     ← Previous
-                </button>
+                </button> */}
 
                 <button
                     type="submit"
@@ -346,8 +357,8 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
                     {isCreatingBooking
                         ? "Creating Booking..."
                         : isProcessingPayment
-                          ? "Processing Payment..."
-                          : "Confirm and Pay →"}
+                            ? "Processing Payment..."
+                            : "Confirm and Pay →"}
                 </button>
             </div>
         </form>

@@ -6,9 +6,9 @@ import { AppDispatch, RootState } from "@/store";
 import { StepTypeAndDate } from "@/components/booking/StepTypeAndDate";
 import {
     fetchDoctorById,
-    setSelectedDoctorId,
     resetBooking,
-    sessionsByDoctorId,
+    setForWhom,
+    setSelectedHospitalName,
 } from "@/store/booking/bookingSlice";
 import type { Doctor } from "@/components/booking/types";
 import { StepForWhom } from "@/components/booking/StepForWhom";
@@ -36,7 +36,6 @@ const BookingPage = ({ params }: PageProps) => {
     // Local state for UI step management
     const [step, setStepState] = useState<UIStep>(1);
 
-    // Redux state
     const {
         fetchDoctorByIdError,
         doctorProfile,
@@ -44,8 +43,16 @@ const BookingPage = ({ params }: PageProps) => {
         bookingError,
     } = useSelector((state: RootState) => state.booking);
 
-    // Get user ID from auth state
     const { userId } = useSelector((state: RootState) => state.auth);
+
+    // Determine if Step 2 should be shown (only for logged-in users)
+    const showStep2 = userId !== null;
+
+    useEffect(() => {
+        if (!showStep2) {
+            dispatch(setForWhom("someone_else"));
+        }
+    }, [showStep2, dispatch]);
 
     // Fetch doctor details and sessions from backend on mount
     useEffect(() => {
@@ -54,7 +61,6 @@ const BookingPage = ({ params }: PageProps) => {
         }
     }, [doctorId, dispatch]);
 
-    // Scroll to top on step change
     const setStep = useCallback((newStep: UIStep) => {
         setStepState(newStep);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -67,8 +73,6 @@ const BookingPage = ({ params }: PageProps) => {
     //     };
     // }, [dispatch]);
 
-    console.log("Doctor profile ", doctorProfile);
-
     // Render step content
     const renderStep = () => {
         switch (step) {
@@ -76,10 +80,12 @@ const BookingPage = ({ params }: PageProps) => {
                 return (
                     <StepTypeAndDate
                         doctorId={doctorId}
-                        onNext={() => setStep(2)}
+                        onNext={() => setStep(showStep2 ? 2 : 3)}
                     />
                 );
             case 2:
+                // Only show Step 2 if user is logged in
+                if (!showStep2) return null;
                 return (
                     <StepForWhom
                         onPrev={() => setStep(1)}
@@ -89,7 +95,7 @@ const BookingPage = ({ params }: PageProps) => {
             case 3:
                 return (
                     <StepPatientDetails
-                        onPrev={() => setStep(2)}
+                        onPrev={() => setStep(showStep2 ? 2 : 1)}
                         onNext={() => setStep(4)}
                     />
                 );
@@ -109,10 +115,9 @@ const BookingPage = ({ params }: PageProps) => {
                         doctorFee={doctorProfile?.consultationFee || ""}
                         onBackHome={() => {
                             dispatch(resetBooking());
+                            dispatch(setSelectedHospitalName(""))
+
                             window.location.href = "/";
-                        }}
-                        onViewAppointments={() => {
-                            window.location.href = "/profile";
                         }}
                     />
                 );
@@ -160,8 +165,8 @@ const BookingPage = ({ params }: PageProps) => {
                                             {doctorProfile.profileImage ? (
                                                 <img
                                                     src={
-                                                        doctorProfile.profileImage 
-                                                       
+                                                        doctorProfile.profileImage
+
                                                     }
                                                     alt={doctorProfile.name}
                                                     className="w-full h-full object-cover"
@@ -170,7 +175,7 @@ const BookingPage = ({ params }: PageProps) => {
                                                 <img
                                                     src={
                                                         "/sample-doctor-mini.png"
-                                                       
+
                                                     }
                                                     alt={doctorProfile.name}
                                                     className="w-full h-full object-cover"
@@ -209,20 +214,26 @@ const BookingPage = ({ params }: PageProps) => {
                             {/* Step Indicator - Compact, No Flare, Tight Width */}
                             <div className="mb-1">
                                 <div className="flex items-center justify-center gap-0 w-full px-2 mb-8 relative z-10 select-none">
-                                    {[1, 2, 3, 4, 5].map(
+                                    {(showStep2 ? [1, 2, 3, 4, 5] : [1, 3, 4, 5]).map(
                                         (stepNumber, i, arr) => {
-                                            const stepLabels = [
+                                            const allStepLabels = [
                                                 "Session",
                                                 "For Whom",
                                                 "Info",
                                                 "Payment",
-                                                "Confirm",
+                                                "Details",
                                             ];
+                                            const stepLabels = showStep2
+                                                ? allStepLabels
+                                                : allStepLabels.filter((_, idx) => idx !== 1);
 
                                             const isCompleted =
-                                                stepNumber < step;
+                                                stepNumber < step || (stepNumber === step && step === 5);
                                             const isActive =
-                                                stepNumber === step;
+                                                stepNumber === step && step !== 5;
+
+                                            // Display number: for logged-out users, show 1,2,3,4 instead of 1,3,4,5
+                                            const displayNumber = showStep2 ? stepNumber : i + 1;
 
                                             return (
                                                 <React.Fragment
@@ -236,7 +247,7 @@ const BookingPage = ({ params }: PageProps) => {
                                                             ${isCompleted
                                                                     ? "bg-green-500 border-green-500 text-white"
                                                                     : isActive
-                                                                        ? "bg-white border-blue-600 text-blue-600 shadow"
+                                                                        ? "bg-blue-600 border-blue-600 text-white shadow"
                                                                         : "bg-gray-100 border-gray-300 text-gray-400"
                                                                 }
                                                         `}
@@ -258,7 +269,7 @@ const BookingPage = ({ params }: PageProps) => {
                                                                     />
                                                                 </svg>
                                                             ) : (
-                                                                stepNumber
+                                                                displayNumber
                                                             )}
                                                         </div>
                                                         {/* Step Label */}
@@ -271,17 +282,11 @@ const BookingPage = ({ params }: PageProps) => {
                                                                         : "text-gray-400"
                                                                 }`}
                                                             title={
-                                                                stepLabels[
-                                                                stepNumber -
-                                                                1
-                                                                ]
+                                                                stepLabels[i]
                                                             }
                                                         >
                                                             {
-                                                                stepLabels[
-                                                                stepNumber -
-                                                                1
-                                                                ]
+                                                                stepLabels[i]
                                                             }
                                                         </span>
                                                     </div>

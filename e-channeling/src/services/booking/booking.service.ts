@@ -185,6 +185,14 @@ export async function updatePaymentStatus(id: string) {
             },
         });
 
+        // add new field called session details and add some session details to the updatedBooking
+        Object.assign(updatedBooking, {
+            sessionDetails: {
+                sessionDate: appointment.sessions.scheduledAt,
+                sessionTime: appointment.sessions.startTime,
+            },
+        });
+
         return updatedBooking;
     });
 }

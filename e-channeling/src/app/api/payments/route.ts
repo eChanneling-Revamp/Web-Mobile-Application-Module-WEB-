@@ -10,7 +10,9 @@ import { ZodError } from "zod";
 export async function POST(request: Request) {
     try {
         console.log("Payment Endpoint ")
+        
         const body = await request.json();
+        console.log(body)
 
         // rate limiting
         const forwarded = request.headers.get("x-forwarded-for");
