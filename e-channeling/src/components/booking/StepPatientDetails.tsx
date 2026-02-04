@@ -6,7 +6,6 @@ import {
     clearBookingSuccess,
     clearPatientDetails,
     createBooking,
-    fetchUserDetails,
     setPatientDetails,
 } from "@/store/booking/bookingSlice";
 import { Gender, PatientDetails } from "./types";
@@ -31,6 +30,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
         createBookingError,
     } = useSelector((state: RootState) => state.booking);
     const { userId } = useSelector((state: RootState) => state.auth);
+    const { user } = useSelector((state: RootState) => state.user);
 
     // Track if form has been submitted (to show errors)
     const [formSubmitted, setFormSubmitted] = useState(false);
@@ -41,7 +41,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
         phone: false,
         email: false,
         nic: false,
-        dateOfBirth: false,
+        age: false,
         gender: false,
     });
 
@@ -49,16 +49,10 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
 
     const isForYou = forWhom === "myself";
 
-    useEffect(() => {
-        if (isForYou) {
-            dispatch(fetchUserDetails(userId));
-        }
-    }, [dispatch]);
-
     // Handle input change
     const handleChange = (
         field: keyof typeof patientDetails,
-        value: string
+        value: string | number,
     ) => {
         dispatch(setPatientDetails({ [field]: value }));
     };
@@ -103,15 +97,11 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
             errors.nic = "Enter a valid NIC";
         }
 
-        // Validate date of birth
-        if (!formData.dateOfBirth) {
-            errors.dateOfBirth = "Date of birth is required";
-        } else {
-            const date = new Date(formData.dateOfBirth);
-            const today = new Date();
-            if (date > today || isNaN(date.getTime())) {
-                errors.dateOfBirth = "Enter a valid date of birth";
-            }
+        // Validate age
+        if (!formData.age) {
+            errors.age = "Age is required";
+        } else if (formData.age < 0 || formData.age > 150) {
+            errors.age = "Age must be between 0 and 150";
         }
 
         // Validate gender
@@ -123,6 +113,12 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
         return Object.keys(errors).length === 0;
     };
 
+    // Handle previous button click
+    const handlePrevious = () => {
+        dispatch(clearPatientDetails());
+        onPrev();
+    };
+
     // Handle form submit
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -131,10 +127,47 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
             dispatch(
                 createBooking({
                     userId: userId,
-                })
+                }),
             );
         }
     };
+
+    // Auto-fill form when isForYou is true and user data is available
+    useEffect(() => {
+        if (isForYou && user && userId) {
+            // Only auto-fill if the fields are empty
+            if (!patientDetails.fullName) {
+                dispatch(setPatientDetails({ fullName: user.name || "" }));
+            }
+            if (!patientDetails.phone) {
+                dispatch(
+                    setPatientDetails({ phone: user.contactNumber || "" }),
+                );
+            }
+            if (!patientDetails.email) {
+                dispatch(setPatientDetails({ email: user.email || "" }));
+            }
+            if (!patientDetails.nic) {
+                dispatch(setPatientDetails({ nic: user.nicNumber || "" }));
+            }
+            if (!patientDetails.age && user.age) {
+                dispatch(setPatientDetails({ age: user.age }));
+            }
+
+            if (!patientDetails.gender && user.gender) {
+                // Convert user.gender (lowercase) to Gender enum (uppercase)
+                const genderMap: { [key: string]: Gender } = {
+                    male: Gender.MALE,
+                    female: Gender.FEMALE,
+                    other: Gender.OTHER,
+                };
+                const mappedGender = genderMap[user.gender.toLowerCase()];
+                if (mappedGender) {
+                    dispatch(setPatientDetails({ gender: mappedGender }));
+                }
+            }
+        }
+    }, [isForYou, user, userId, dispatch]);
 
     useEffect(() => {
         if (isCreateBookingSuccess === true) {
@@ -189,7 +222,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                     <input
                         type="text"
                         id="fullName"
-                        value={patientDetails.fullName}
+                        value={patientDetails.fullName || ""}
                         onChange={(e) =>
                             handleChange("fullName", e.target.value)
                         }
@@ -208,9 +241,10 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${patientDetails.fullName
-                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${
+                                patientDetails.fullName
+                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.fullName ? "text-red-500" : ""}
                         `}
@@ -229,7 +263,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                     <input
                         type="text"
                         id="nic"
-                        value={patientDetails.nic}
+                        value={patientDetails.nic || ""}
                         onChange={(e) => handleChange("nic", e.target.value)}
                         onBlur={() => handleBlur("nic")}
                         onFocus={() => setTouched((t) => ({ ...t, nic: true }))}
@@ -244,9 +278,10 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${patientDetails.nic
-                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${
+                                patientDetails.nic
+                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.nic ? "text-red-500" : ""}
                         `}
@@ -268,7 +303,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                     <input
                         type="tel"
                         id="phone"
-                        value={patientDetails.phone}
+                        value={patientDetails.phone || ""}
                         onChange={(e) => handleChange("phone", e.target.value)}
                         onBlur={() => handleBlur("phone")}
                         onFocus={() =>
@@ -285,9 +320,10 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${patientDetails.phone
-                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${
+                                patientDetails.phone
+                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.phone ? "text-red-500" : ""}
                         `}
@@ -307,7 +343,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                     <input
                         type="email"
                         id="email"
-                        value={patientDetails.email}
+                        value={patientDetails.email || ""}
                         onChange={(e) => handleChange("email", e.target.value)}
                         onBlur={() => handleBlur("email")}
                         onFocus={() =>
@@ -324,9 +360,10 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${patientDetails.email
-                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${
+                                patientDetails.email
+                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.email ? "text-red-500" : ""}
                         `}
@@ -340,42 +377,45 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                     )}
                 </div>
             </div>
-            {/* Date of Birth and Gender Row */}
+            {/* Age and Gender Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Date of Birth */}
+                {/* Age */}
                 <div className="relative mt-4">
                     <input
-                        type="date"
-                        id="dateOfBirth"
-                        value={patientDetails.dateOfBirth}
+                        type="number"
+                        id="age"
+                        value={patientDetails.age || ""}
                         onChange={(e) =>
-                            handleChange("dateOfBirth", e.target.value)
+                            handleChange("age", parseInt(e.target.value) || 0)
                         }
-                        onBlur={() => handleBlur("dateOfBirth")}
-                        onFocus={() =>
-                            setTouched((t) => ({ ...t, dateOfBirth: true }))
-                        }
-                        max={new Date().toISOString().split("T")[0]}
-                        className={`${inputClass} ${showErrors.dateOfBirth ? errorClass : ""} peer pt-5`}
+                        onBlur={() => handleBlur("age")}
+                        onFocus={() => setTouched((t) => ({ ...t, age: true }))}
+                        className={`${inputClass} ${showErrors.age ? errorClass : ""} peer pt-5`}
                         autoComplete="off"
                         placeholder=" "
+                        min="0"
+                        max="150"
                     />
                     <label
-                        htmlFor="dateOfBirth"
+                        htmlFor="age"
                         className={`
-                            absolute left-2 px-1 bg-white
-                            text-xs top-0 -translate-y-1/2
+                            absolute left-3 px-1 bg-white
+                            text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            text-gray-500 peer-focus:text-blue-600
-                            ${showErrors.dateOfBirth ? "text-red-500 peer-focus:text-red-500" : ""}
+                            ${
+                                patientDetails.age
+                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            }
+                            ${showErrors.age ? "text-red-500" : ""}
                         `}
                     >
-                        Date of Birth *
+                        Age *
                     </label>
-                    {showErrors.dateOfBirth && (
+                    {showErrors.age && (
                         <p className="text-sm text-red-600 mt-1">
-                            {showErrors.dateOfBirth}
+                            Age is required
                         </p>
                     )}
                 </div>
@@ -384,7 +424,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                 <div className="relative mt-4">
                     <select
                         id="gender"
-                        value={patientDetails.gender}
+                        value={patientDetails.gender || ""}
                         onChange={(e) => handleChange("gender", e.target.value)}
                         onBlur={() => handleBlur("gender")}
                         onFocus={() =>
@@ -404,9 +444,10 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                             text-gray-500 text-sm
                             transition-all duration-200
                             pointer-events-none
-                            ${patientDetails.gender || touched.gender
-                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                            ${
+                                patientDetails.gender || touched.gender
+                                    ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                    : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                             }
                             ${showErrors.gender ? "text-red-500" : ""}
                         `}
@@ -424,7 +465,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
             <div className="relative mt-5">
                 <textarea
                     id="disease"
-                    value={patientDetails.disease}
+                    value={patientDetails.disease || ""}
                     onChange={(e) => handleChange("disease", e.target.value)}
                     rows={3}
                     className={`${inputClass} resize-none peer pt-5`}
@@ -438,9 +479,10 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                         text-gray-500 text-sm
                         transition-all duration-200
                         pointer-events-none
-                        ${patientDetails.disease
-                            ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
-                            : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
+                        ${
+                            patientDetails.disease
+                                ? "text-xs text-blue-600 top-0 -translate-y-1/2 left-2"
+                                : "top-1/2 -translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2"
                         }
                     `}
                 >
@@ -472,9 +514,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                         />
                     </svg>
                     <span>
-                        {typeof createBookingError === "string"
-                            ? createBookingError
-                            : "Failed to create booking. Please try again."}
+                        {createBookingError}
                     </span>
                 </div>
             )}
@@ -483,7 +523,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
             <div className="flex items-center justify-between pt-4">
                 <button
                     type="button"
-                    onClick={onPrev}
+                    onClick={handlePrevious}
                     className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 >
                     ← Previous
@@ -495,7 +535,7 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
                         !patientDetails.fullName ||
                         !patientDetails.phone ||
                         !patientDetails.nic ||
-                        !patientDetails.dateOfBirth ||
+                        !patientDetails.age ||
                         !patientDetails.gender ||
                         createBookingLoading
                     }

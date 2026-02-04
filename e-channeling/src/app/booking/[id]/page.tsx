@@ -1,6 +1,5 @@
 "use client";
 import React, { use, useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import { StepTypeAndDate } from "@/components/booking/StepTypeAndDate";
@@ -10,7 +9,6 @@ import {
     setForWhom,
     setSelectedHospitalName,
 } from "@/store/booking/bookingSlice";
-import type { Doctor } from "@/components/booking/types";
 import { StepForWhom } from "@/components/booking/StepForWhom";
 import { StepPatientDetails } from "@/components/booking/StepPatientDetails";
 import { StepPayment } from "@/components/booking/StepPayment";

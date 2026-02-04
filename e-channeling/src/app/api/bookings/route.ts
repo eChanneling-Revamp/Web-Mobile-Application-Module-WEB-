@@ -53,7 +53,7 @@ export async function POST(request: Request) {
             patientEmail: appointment.patientEmail,
             patientPhone: appointment.patientPhone,
             patientNIC: appointment.patientNIC,
-            patientDateOfBirth: appointment.patientDateOfBirth,
+            patientAge: appointment.patientAge,
             patientGender: appointment.patientGender,
             status: appointment.status,
             consultationFee: appointment.consultationFee,
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
             {
                 success: false,
-                message: error || "Internal server error",
+                message: error.message || "Internal server error",
             },
             { status: 500 }
         );

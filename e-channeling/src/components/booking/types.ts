@@ -58,7 +58,7 @@ export interface PatientDetails {
     phone: string;
     email: string;
     nic: string;
-    dateOfBirth: string; // YYYY-MM-DD format
+    age: number;
     gender: Gender | "";
     disease: string; // Optional notes
 }
@@ -140,10 +140,10 @@ export interface BookingState {
     // Step 3 data - Updated to match backend schema
     patientDetails: {
         fullName: string;
-        phone: string;
+        phone: string;  
         email: string;
         nic: string;
-        dateOfBirth: string; // YYYY-MM-DD format
+        age: number;
         gender: Gender | "";
         disease: string; // Optional notes
     };
@@ -171,7 +171,7 @@ export interface CreateBookingRequest {
     patientEmail: string;
     patientPhone: string;
     patientNIC: string;
-    patientDateOfBirth: string; // YYYY-MM-DD
+    patientAge: number;
     patientGender: Gender;
     medicalReport?: string;
 }
@@ -185,7 +185,7 @@ export interface CreateBookingResponse {
         patientEmail: string;
         patientPhone: string;
         patientNIC: string;
-        patientDateOfBirth: Date;
+        patientAge: number;
         patientGender: Gender;
         status: AppointmentStatus;
         consultationFee: number;

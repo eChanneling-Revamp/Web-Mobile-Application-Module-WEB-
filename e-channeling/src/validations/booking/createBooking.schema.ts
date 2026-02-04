@@ -46,15 +46,12 @@ export const bookingSchema = z.object({
         .min(1, "NIC is required")
         .regex(nicRegex, "Invalid NIC format"),
 
-    patientDateOfBirth: z
-        .string()
-        .min(1, "Date of birth is required")
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-        .refine((date) => !isNaN(Date.parse(date)), "Invalid date")
-        .refine(
-            (date) => new Date(date) <= new Date(),
-            "Date of birth cannot be in the future",
-        ),
+    patientAge: z
+        .number({
+            message: "Patient age must be a number",
+        })
+        .min(0, "Patient age cannot be negative")
+        .max(150, "Patient age must be less than 150"),
 
     patientGender: z.enum(["MALE", "FEMALE", "OTHER"], {
         message: "Gender must be MALE, FEMALE, or OTHER",

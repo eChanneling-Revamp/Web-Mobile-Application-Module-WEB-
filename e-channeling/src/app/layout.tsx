@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ReduxProvider from "@/providers/ReduxProvider";
+import InitAuth from "@/components/auth/InitAuth";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
                 suppressHydrationWarning
             >
                 <ReduxProvider>
+                    <InitAuth />
                     <Navbar />
                     <main className="flex-1">{children}</main>
                     <Footer />

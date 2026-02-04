@@ -49,14 +49,14 @@ const initialState: BookingState = {
         phone: "",
         email: "",
         nic: "",
-        dateOfBirth: "",
+        age: 0,
         gender: "",
         disease: "",
     },
 
     isCreateBookingSuccess: false,
     createBookingLoading: false,
-    createBookingError: null,
+    createBookingError: "",
 
     // Confirmation
     confirmationData: null,
@@ -104,22 +104,7 @@ export const sessionsByDoctorId = createAsyncThunk<
     }
 });
 
-// get user information (for you)
-export const fetchUserDetails = createAsyncThunk<
-    User,
-    string | null,
-    { rejectValue: string }
->("booking/fetchUserDetails", async (userId, { rejectWithValue }) => {
-    try {
-        const response = await api.get(`/user/${userId}`);
-        return response.data.data;
-    } catch (error: unknown) {
-        const err = error as { response?: { data?: { message?: string } } };
-        return rejectWithValue(
-            err.response?.data?.message || "Failed to fetch user details"
-        );
-    }
-});
+
 
 // // Search sessions - INTEGRATED WITH BACKEND
 // // Uses backend GET /api/search with filters
@@ -176,7 +161,7 @@ export const createBooking = createAsyncThunk<
                 !patientDetails.fullName ||
                 !patientDetails.phone ||
                 !patientDetails.nic ||
-                !patientDetails.dateOfBirth ||
+                !patientDetails.age ||
                 !patientDetails.gender
             ) {
                 throw new Error("All required patient details must be filled");
@@ -189,7 +174,7 @@ export const createBooking = createAsyncThunk<
                 patientEmail: patientDetails.email || "",
                 patientPhone: patientDetails.phone,
                 patientNIC: patientDetails.nic,
-                patientDateOfBirth: patientDetails.dateOfBirth,
+                patientAge: patientDetails.age,
                 patientGender: patientDetails.gender as Gender,
                 medicalReport: patientDetails.disease,
             };
@@ -200,8 +185,7 @@ export const createBooking = createAsyncThunk<
             return response.data.data;
         } catch (error: any) {
             return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
+                error.response?.data?.message ||
                 "Failed to create booking"
             );
         }
@@ -285,7 +269,7 @@ const bookingSlice = createSlice({
                 phone: "",
                 email: "",
                 nic: "",
-                dateOfBirth: "",
+                age: 0,
                 gender: "",
                 disease: "",
             };
@@ -330,21 +314,6 @@ const bookingSlice = createSlice({
                     action.payload || "Failed to fetch doctor";
             })
 
-            // fetch user details
-            .addCase(fetchUserDetails.pending, (state) => {
-                state.fetchUserDetailsdLoading = true;
-                state.fetchUserDetailsIdError = null;
-            })
-            .addCase(fetchUserDetails.fulfilled, (state, action) => {
-                state.fetchUserDetailsdLoading = false;
-                state.fetchUserDetailsIdError = null;
-                state.user = action.payload;
-            })
-            .addCase(fetchUserDetails.rejected, (state, action) => {
-                state.fetchUserDetailsdLoading = false;
-                state.fetchUserDetailsIdError =
-                    action.payload || "Failed to fetch user details";
-            })
 
             // Search sessions
 

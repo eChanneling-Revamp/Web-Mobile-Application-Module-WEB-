@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Globe, User, Bell, Menu, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { logout, rehydrateAuth } from "@/store/auth/authSlice";
+import { logout } from "@/store/auth/authSlice";
+import { clearUser } from "@/store/user/userSlice";
 import { usePathname, useRouter } from "next/navigation";
 import NotificationPanel from "../notifications/NotificationPanel";
 
@@ -16,7 +17,7 @@ const Navbar = () => {
 
     // Get notifications from Redux store
     const { notifications } = useSelector(
-        (state: RootState) => state.notifications
+        (state: RootState) => state.notifications,
     );
     const unreadCount =
         notifications?.filter((notification) => !notification.isRead).length ||
@@ -27,19 +28,15 @@ const Navbar = () => {
     const pathname = usePathname();
     const isActive = pathname;
 
-    //get auth status
-    const { userToken, isLoginSuccess } = useSelector(
-        (state: RootState) => state.auth
+    //get auth status and hydration state
+    const { userToken, isLoginSuccess, isHydrated } = useSelector(
+        (state: RootState) => state.auth,
     );
     const isAuthenticated =
         isLoginSuccess && userToken && Object.keys(userToken).length > 0;
 
-    // Rehydrate auth state from localStorage on mount (client-side only)
-    useEffect(() => {
-        dispatch(rehydrateAuth());
-    }, [dispatch]);
-
-    //const [isAuthenticated, setIsAuthenticated] = useState();
+    // Get user data from user slice
+    const { user } = useSelector((state: RootState) => state.user);
 
     // mobile nav bar
     const toggleMobileMenu = () => {
@@ -64,6 +61,7 @@ const Navbar = () => {
         //setIsAuthenticated(false)
         //if (typeof window !== "undefined") localStorage.removeItem("token");
         dispatch(logout());
+        dispatch(clearUser());
         setIsProfileDropdownOpen(false);
         router.push("/");
     };
@@ -149,7 +147,10 @@ const Navbar = () => {
                     </div>
 
                     <div className="flex items-center space-x-3 sm:space-x-4">
-                        {!isAuthenticated ? (
+                        {/* Show placeholder until hydration is complete to prevent flickering */}
+                        {!isHydrated ? (
+                            <div className="w-44 h-9" />
+                        ) : !isAuthenticated ? (
                             <div className="flex items-center space-x-3">
                                 <div className="hidden sm:flex items-center space-x-1 text-sm text-gray-600 px-2 py-1 rounded hover:bg-gray-100 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300">
                                     <Globe className="w-5 h-5 mr-1" />

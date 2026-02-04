@@ -82,6 +82,7 @@ interface AuthState {
     isVerifyOtpError: string | null;
     isOtpVerified: boolean;
     signupData: Partial<SignupData>;
+    isHydrated: boolean;
 }
 
 interface RequestOtpPayload {
@@ -127,6 +128,7 @@ const initialState: AuthState = {
     isVerifyOtpError: null,
     isOtpVerified: false,
     signupData: {},
+    isHydrated: false,
 };
 
 // Request OTP
@@ -142,7 +144,7 @@ export const requestOtp = createAsyncThunk<
     } catch (error: unknown) {
         const err = error as { response?: { data?: { error?: string } } };
         return rejectWithValue(
-            err.response?.data?.error || "An error occurred while sending OTP."
+            err.response?.data?.error || "An error occurred while sending OTP.",
         );
     }
 });
@@ -160,7 +162,7 @@ export const verifyOtp = createAsyncThunk<
     } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } } };
         return rejectWithValue(
-            err.response?.data?.message || "Invalid OTP code."
+            err.response?.data?.message || "Invalid OTP code.",
         );
     }
 });
@@ -177,7 +179,7 @@ export const signup = createAsyncThunk<
     } catch (error: unknown) {
         const err = error as { response?: { data?: { error?: string } } };
         return rejectWithValue(
-            err.response?.data?.error || "An error occurred during signup."
+            err.response?.data?.error || "An error occurred during signup.",
         );
     }
 });
@@ -195,7 +197,7 @@ export const login = createAsyncThunk<
         const err = error as { response?: { data?: { error?: string } } };
         return rejectWithValue(
             err.response?.data?.error ||
-                "An unexpected error occurred during login."
+                "An unexpected error occurred during login.",
         );
     }
 });
@@ -228,6 +230,10 @@ const authSlice = createSlice({
                     }
                 }
             }
+        },
+        // Mark hydration as complete
+        setHydrated: (state) => {
+            state.isHydrated = true;
         },
         clearErrors: (state) => {
             state.isLoginError = null;
@@ -293,7 +299,7 @@ const authSlice = createSlice({
                         localStorage.setItem("accessToken", accessToken);
                         localStorage.setItem("userId", userId);
                     }
-                }
+                },
             )
             .addCase(login.rejected, (state, action) => {
                 state.isLoginLoading = false;
@@ -361,7 +367,7 @@ const authSlice = createSlice({
                         localStorage.setItem("accessToken", accessToken);
                         localStorage.setItem("userId", userId);
                     }
-                }
+                },
             )
             .addCase(signup.rejected, (state, action) => {
                 state.isSignupLoading = false;
@@ -372,6 +378,7 @@ const authSlice = createSlice({
 
 export const {
     rehydrateAuth,
+    setHydrated,
     clearErrors,
     logout,
     setSignupData,

@@ -75,7 +75,6 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         const appointmentId = UUIDv4();
         const appointmentNumber = generateAppointmentNumber();
         const consultationFee = session.doctors.consultationFee;
-        const patientDateOfBirth = new Date(data.patientDateOfBirth);
 
         const appointment = await tx.appointments.create({
             data: {
@@ -89,7 +88,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
                 patientPhone: data.patientPhone,
                 patientNIC: data.patientNIC,
                 patientGender: data.patientGender,
-                patientDateOfBirth: patientDateOfBirth,
+                patientAge: data.patientAge,
                 medicalReportUrl: data.medicalReport || null,
                 status: "CONFIRMED",
                 consultationFee: consultationFee,
@@ -129,15 +128,13 @@ export async function updateBooking(id: string, data: any) {
             throw new Error("Session not available for updates");
         }
 
-        const patientDateOfBirth = new Date(data.patientDateOfBirth);
-
         const updatedBooking = await tx.appointments.update({
             where: {
                 appointmentNumber: id,
             },
             data: {
                 ...data,
-                patientDateOfBirth: patientDateOfBirth,
+                patientAge: data.patientAge,
                 updatedAt: new Date(),
             },
         });
@@ -194,7 +191,7 @@ export async function updatePaymentStatus(id: string) {
                 patientPhone: true,
                 patientNIC: true,
                 patientGender: true,
-                patientDateOfBirth: true,
+                patientAge: true,
                 medicalReportUrl: true,
                 status: true,
                 consultationFee: true,

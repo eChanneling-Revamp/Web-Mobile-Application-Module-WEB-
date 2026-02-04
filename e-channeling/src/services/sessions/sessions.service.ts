@@ -4,6 +4,7 @@ export default async function getSessionsByDoctorId(id: string) {
     return await prisma.sessions.findMany({
         where: {
             doctorId: id,
+            status: "SCHEDULED",
         },
         include: {
             hospitals: {
