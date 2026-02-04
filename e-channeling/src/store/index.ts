@@ -8,6 +8,7 @@ import notificationReducer from "@/store/notifications/notificationSlice";
 import hospitalsReducer from "@/store/hospitals/hospitalsSlice";
 import paymentReducer from "@/store/payment/paymentSlice";
 import userReducer from "@/store/user/userSlice";
+import runningNumberReducer from "@/store/running-number/runningNumberSlice";
 
 export const store = configureStore({
     reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
         hospitals: hospitalsReducer,
         payment: paymentReducer,
         user: userReducer,
+        runningNumber: runningNumberReducer,
     },
 });
 
