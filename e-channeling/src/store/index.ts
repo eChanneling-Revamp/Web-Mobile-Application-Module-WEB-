@@ -5,6 +5,7 @@ import bookingReducer from "@/store/booking/bookingSlice";
 import searchReducer from "@/store/search/searchSlice";
 import profileReducer from "./profile/profileSlice";
 import notificationReducer from "@/store/notifications/notificationSlice";
+import runningNumberReducer from "@/store/running-number/runningNumberSlice";
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         booking: bookingReducer,
         search: searchReducer,
         notifications: notificationReducer,
+        runningNumber: runningNumberReducer,
     },
 });
 
