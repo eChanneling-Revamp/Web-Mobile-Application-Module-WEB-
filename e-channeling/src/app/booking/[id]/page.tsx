@@ -1,20 +1,19 @@
 "use client";
 import React, { use, useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import { StepTypeAndDate } from "@/components/booking/StepTypeAndDate";
 import {
     fetchDoctorById,
-    setSelectedDoctorId,
     resetBooking,
-    sessionsByDoctorId,
+    setForWhom,
+    setSelectedHospitalName,
 } from "@/store/booking/bookingSlice";
-import type { Doctor } from "@/components/booking/types";
 import { StepForWhom } from "@/components/booking/StepForWhom";
 import { StepPatientDetails } from "@/components/booking/StepPatientDetails";
 import { StepPayment } from "@/components/booking/StepPayment";
 import { StepConfirmation } from "@/components/booking/StepConfirmation";
+import { AppointmentSkeleton } from "@/components/booking/AppointmentSkeleton";
 
 type UIStep = 1 | 2 | 3 | 4 | 5;
 
@@ -35,17 +34,23 @@ const BookingPage = ({ params }: PageProps) => {
     // Local state for UI step management
     const [step, setStepState] = useState<UIStep>(1);
 
-    // Redux state
     const {
-        fetchDoctorByIdLoading,
         fetchDoctorByIdError,
         doctorProfile,
-
+        fetchDoctorByIdLoading,
         bookingError,
     } = useSelector((state: RootState) => state.booking);
 
-    // Get user ID from auth state
     const { userId } = useSelector((state: RootState) => state.auth);
+
+    // Determine if Step 2 should be shown (only for logged-in users)
+    const showStep2 = userId !== null;
+
+    useEffect(() => {
+        if (!showStep2) {
+            dispatch(setForWhom("someone_else"));
+        }
+    }, [showStep2, dispatch]);
 
     // Fetch doctor details and sessions from backend on mount
     useEffect(() => {
@@ -54,7 +59,6 @@ const BookingPage = ({ params }: PageProps) => {
         }
     }, [doctorId, dispatch]);
 
-    // Scroll to top on step change
     const setStep = useCallback((newStep: UIStep) => {
         setStepState(newStep);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -67,8 +71,6 @@ const BookingPage = ({ params }: PageProps) => {
     //     };
     // }, [dispatch]);
 
-    console.log("Doctor profile ", doctorProfile);
-
     // Render step content
     const renderStep = () => {
         switch (step) {
@@ -76,10 +78,12 @@ const BookingPage = ({ params }: PageProps) => {
                 return (
                     <StepTypeAndDate
                         doctorId={doctorId}
-                        onNext={() => setStep(2)}
+                        onNext={() => setStep(showStep2 ? 2 : 3)}
                     />
                 );
             case 2:
+                // Only show Step 2 if user is logged in
+                if (!showStep2) return null;
                 return (
                     <StepForWhom
                         onPrev={() => setStep(1)}
@@ -89,7 +93,7 @@ const BookingPage = ({ params }: PageProps) => {
             case 3:
                 return (
                     <StepPatientDetails
-                        onPrev={() => setStep(2)}
+                        onPrev={() => setStep(showStep2 ? 2 : 1)}
                         onNext={() => setStep(4)}
                     />
                 );
@@ -105,14 +109,11 @@ const BookingPage = ({ params }: PageProps) => {
             case 5:
                 return (
                     <StepConfirmation
-                        doctorName={doctorProfile?.name || ""}
-                        doctorFee={doctorProfile?.consultationFee || ""}
                         onBackHome={() => {
                             dispatch(resetBooking());
+                            dispatch(setSelectedHospitalName(""))
+
                             window.location.href = "/";
-                        }}
-                        onViewAppointments={() => {
-                            window.location.href = "/profile";
                         }}
                     />
                 );
@@ -123,16 +124,7 @@ const BookingPage = ({ params }: PageProps) => {
 
     // Loading state
     if (fetchDoctorByIdLoading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">
-                        Loading doctor information...
-                    </p>
-                </div>
-            </div>
-        );
+        return <AppointmentSkeleton />;
     }
 
     // Error state
@@ -152,27 +144,10 @@ const BookingPage = ({ params }: PageProps) => {
         );
     }
 
-    // No doctor ID provided
-    if (!doctorId) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-gray-600">No doctor selected</p>
-                    <button
-                        onClick={() => window.history.back()}
-                        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-full"
-                    >
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-gray-150 py-10 px-4">
-            <div className="max-w-7xl mx-auto">
-                <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-3">
+            <div className="max-w-7xl mx-auto rounded-3xl shadow-2xl ">
+                <div className="bg-white rounded-3xl  p-6 ">
                     <h1 className="text-3xl font-bold text-center mb-6">
                         Book Appointment
                     </h1>
@@ -180,24 +155,40 @@ const BookingPage = ({ params }: PageProps) => {
                         {/* Left: Doctor Info Card */}
                         <aside className="rounded-2xl bg-gray-50 shadow-md p-5 h-fit">
                             {doctorProfile ? (
-                                <div className="flex items-start gap-3 mb-0.5">
-                                    <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                                        {doctorProfile.profileImage ? (
-                                            <img
-                                                src={doctorProfile.profileImage}
-                                                alt={doctorProfile.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full bg-gray-300"></div>
-                                        )}
+                                <div className="flex flex-row sm:flex-col gap-3 mb-0.5">
+                                    <div className="flex justify-center items-center p-4">
+                                        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex justify-center items-center">
+                                            {doctorProfile.profileImage ? (
+                                                <img
+                                                    src={
+                                                        doctorProfile.profileImage
+
+                                                    }
+                                                    alt={doctorProfile.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={
+                                                        "/sample-doctor-mini.png"
+
+                                                    }
+                                                    alt={doctorProfile.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="space-y-2">
                                         <p className="font-semibold text-lg">
                                             {doctorProfile.name}
                                         </p>
                                         <p className="text-sm text-gray-600">
                                             {doctorProfile.specialization}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            Years of experience :{" "}
+                                            {doctorProfile.experience}
                                         </p>
                                     </div>
                                 </div>
@@ -216,60 +207,107 @@ const BookingPage = ({ params }: PageProps) => {
 
                         {/* Step Content */}
                         <div>
-                            {/* Step Indicator */}
+                            {/* Step Indicator - Compact, No Flare, Tight Width */}
                             <div className="mb-1">
-                                <div className="flex items-start justify-center gap-6 w-full px-4 mb-8">
-                                    {[1, 2, 3, 4, 5].map((stepNumber) => {
-                                        const stepLabels = [
-                                            "Session",
-                                            "For Whom",
-                                            "Info",
-                                            "Payment",
-                                            "Confirm",
-                                        ];
-                                        return (
-                                            <div
-                                                key={stepNumber}
-                                                className="flex flex-col items-center relative"
-                                                style={{ flex: "0 1 auto" }}
-                                            >
-                                                {/* Connecting Line (before this step) */}
-                                                {stepNumber > 1 && (
-                                                    <div
-                                                        className={`absolute -left-3 top-4 w-6 h-0.5 ${
-                                                            stepNumber - 1 <
-                                                            step
-                                                                ? "bg-blue-600"
-                                                                : "bg-gray-200"
-                                                        }`}
-                                                    />
-                                                )}
+                                <div className="flex items-center justify-center gap-0 w-full px-2 mb-8 relative z-10 select-none">
+                                    {(showStep2 ? [1, 2, 3, 4, 5] : [1, 3, 4, 5]).map(
+                                        (stepNumber, i, arr) => {
+                                            const allStepLabels = [
+                                                "Session",
+                                                "For Whom",
+                                                "Info",
+                                                "Payment",
+                                                "Details",
+                                            ];
+                                            const stepLabels = showStep2
+                                                ? allStepLabels
+                                                : allStepLabels.filter((_, idx) => idx !== 1);
 
-                                                {/* Step Circle */}
-                                                <div
-                                                    className={`rounded-full h-8 w-8 flex items-center justify-center text-sm font-medium transition-all duration-200 mb-2 relative z-10 ${
-                                                        stepNumber <= step
-                                                            ? "bg-blue-600 text-white shadow-md"
-                                                            : "border-2 border-gray-200 text-gray-400"
-                                                    }`}
+                                            const isCompleted =
+                                                stepNumber < step || (stepNumber === step && step === 5);
+                                            const isActive =
+                                                stepNumber === step && step !== 5;
+
+                                            // Display number: for logged-out users, show 1,2,3,4 instead of 1,3,4,5
+                                            const displayNumber = showStep2 ? stepNumber : i + 1;
+
+                                            return (
+                                                <React.Fragment
+                                                    key={stepNumber}
                                                 >
-                                                    {stepNumber < step
-                                                        ? "✓"
-                                                        : stepNumber}
-                                                </div>
-
-                                                {/* Step Label */}
-                                                <span className="text-xs text-gray-600 text-center w-14">
-                                                    {stepLabels[stepNumber - 1]}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
+                                                    <div className="flex flex-col items-center relative min-w-[38px] px-1 mt-3">
+                                                        {/* Step Circle */}
+                                                        <div
+                                                            className={`h-8 w-8 flex items-center justify-center rounded-full transition-all duration-200 border
+                                                            text-[11px] font-bold shadow-sm
+                                                            ${isCompleted
+                                                                    ? "bg-green-500 border-green-500 text-white"
+                                                                    : isActive
+                                                                        ? "bg-blue-600 border-blue-600 text-white shadow"
+                                                                        : "bg-gray-100 border-gray-300 text-gray-400"
+                                                                }
+                                                        `}
+                                                        >
+                                                            {isCompleted ? (
+                                                                <svg
+                                                                    className="w-3.5 h-3.5"
+                                                                    fill="none"
+                                                                    viewBox="0 0 24 24"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth={
+                                                                        3
+                                                                    }
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        d="M5 13l4 4L19 7"
+                                                                    />
+                                                                </svg>
+                                                            ) : (
+                                                                displayNumber
+                                                            )}
+                                                        </div>
+                                                        {/* Step Label */}
+                                                        <span
+                                                            className={`mt-0.5 text-[11px] font-medium text-center w-14 transition-colors duration-150 truncate
+                                                        ${isCompleted
+                                                                    ? "text-green-700"
+                                                                    : isActive
+                                                                        ? "text-blue-700"
+                                                                        : "text-gray-400"
+                                                                }`}
+                                                            title={
+                                                                stepLabels[i]
+                                                            }
+                                                        >
+                                                            {
+                                                                stepLabels[i]
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                    {/* Connector Line */}
+                                                    {i !== arr.length - 1 && (
+                                                        <div className="flex items-center">
+                                                            <div
+                                                                className={`h-0.5 w-5 rounded transition-colors duration-150 ${isCompleted
+                                                                    ? "bg-green-400"
+                                                                    : isActive
+                                                                        ? "bg-blue-400"
+                                                                        : "bg-gray-200"
+                                                                    }`}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </React.Fragment>
+                                            );
+                                        }
+                                    )}
                                 </div>
                             </div>
 
                             {/* Step Content */}
-                            <div className="bg-white rounded-xl shadow-sm p-3">
+                            <div className="bg-white rounded-xl shadow-lg p-3">
                                 {renderStep()}
                             </div>
                         </div>

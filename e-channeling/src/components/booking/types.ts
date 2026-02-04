@@ -53,6 +53,16 @@ export interface User {
   gender: "male" | "female" | "other";
 }
 
+export interface PatientDetails {
+    fullName: string;
+    phone: string;
+    email: string;
+    nic: string;
+    age: number;
+    gender: Gender | "";
+    disease: string; // Optional notes
+}
+
 export interface Hospital {
     id: string;
     name: string;
@@ -130,22 +140,17 @@ export interface BookingState {
     // Step 3 data - Updated to match backend schema
     patientDetails: {
         fullName: string;
-        phone: string;
+        phone: string;  
         email: string;
         nic: string;
-        dateOfBirth: string; // YYYY-MM-DD format
+        age: number;
         gender: Gender | "";
-        emergencyContactPhone: string;
         disease: string; // Optional notes
     };
 
-    // Step 4 - Payment data
-    paymentDetails: {
-        cardNumber: string;
-        cardHolderName: string;
-        expiryDate: string; // MM/YY
-        cvv: string;
-    };
+    isCreateBookingSuccess:boolean
+    createBookingLoading: boolean
+    createBookingError: string | null
 
     // Confirmation data from backend
     confirmationData: CreateBookingResponse | null;
@@ -156,27 +161,22 @@ export interface BookingState {
 
     // Error states
     bookingError: string | null;
-    paymentError: string | null;
 }
 
 // API Request/Response types matching backend
 export interface CreateBookingRequest {
-    userId: string;
+    userId: string | null;
     sessionId: string;
     patientName: string;
     patientEmail: string;
     patientPhone: string;
     patientNIC: string;
-    patientDateOfBirth: string; // YYYY-MM-DD
+    patientAge: number;
     patientGender: Gender;
-    emergencyContactPhone?: string;
-    medicalReports?: string;
+    medicalReport?: string;
 }
 
 export interface CreateBookingResponse {
-    success: boolean;
-    message: string;
-    data: {
         appointmentId: string;
         appointmentNumber: string;
         sessionId: string;
@@ -185,13 +185,25 @@ export interface CreateBookingResponse {
         patientEmail: string;
         patientPhone: string;
         patientNIC: string;
-        patientDateOfBirth: Date;
+        patientAge: number;
         patientGender: Gender;
         status: AppointmentStatus;
         consultationFee: number;
         paymentStatus: PaymentStatus;
         queuePosition: number;
+}
+
+export interface PaymentState {
+    paymentDetails: {
+        cardNumber: string;
+        cardHolderName: string;
+        expiryDate: string;
+        cvv: string;
     };
+    isProcessingPayment: boolean;
+    paymentError: string | null;
+    isPaymentSuccess: boolean;
+    updateAppointment: any;
 }
 
 export interface PaymentRequest {

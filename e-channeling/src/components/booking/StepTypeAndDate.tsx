@@ -4,11 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import {
     sessionsByDoctorId,
-    setSelectedHospitalId,
-    setSelectedSessionCard,
+    setSelectedHospitalName,
     setSelectedSessionId,
 } from "@/store/booking/bookingSlice";
-import type { Hospital, SessionCard } from "./types";
 
 interface StepTypeAndDateProps {
     doctorId: string;
@@ -33,6 +31,7 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
     const [appointmentType, setAppointmentType] = useState<
         "in-person" | "video-consultation"
     >("in-person");
+    const [error, setError] = useState("")
 
     // fetch the doctor sessions
     useEffect(() => {
@@ -42,6 +41,15 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
     const handleSessionSelect = (session: any) => {
         dispatch(setSelectedSessionId(session.id));
     };
+
+    const handleNext = ()=>{
+        if (!selectedSessionId){
+            setError("Please select a session before proceeding to the next step.")
+            return
+        }
+        onNext()
+
+    }
 
     // SessionSkeleton
     const SessionSkeleton = () => {
@@ -89,7 +97,10 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                     {/* In-Person Visit */}
                     <button
                         type="button"
-                        onClick={() => setAppointmentType("in-person")}
+                        onClick={() => {
+                            setAppointmentType("in-person");
+                            dispatch(setSelectedSessionId(null));
+                        }}
                         className={`rounded-xl border-2 p-4 text-left transition-all duration-200 ${
                             appointmentType === "in-person"
                                 ? "border-green-500 bg-green-50 shadow-md ring-2 ring-green-200"
@@ -159,7 +170,9 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                     {/* Video Consultation */}
                     <button
                         type="button"
-                        onClick={() => setAppointmentType("video-consultation")}
+                        onClick={() => { setAppointmentType("video-consultation");
+                            dispatch(setSelectedSessionId(null));
+                        }}
                         className={`rounded-xl border-2 p-4 text-left transition-all duration-200 ${
                             appointmentType === "video-consultation"
                                 ? "border-green-500 bg-green-50 shadow-md ring-2 ring-green-200"
@@ -274,9 +287,10 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                                         <button
                                             key={session.id}
                                             type="button"
-                                            onClick={() =>
+                                            onClick={() =>{
                                                 handleSessionSelect(session)
-                                            }
+                                                dispatch(setSelectedHospitalName(session.hospitals.name))
+                                            }}
                                             className={`rounded-xl border-2 border-gray-300 p-3 text-left transition-all duration-200 hover:shadow-lg  ${
                                                 isSelected
                                                     ? "border-green-500 bg-green-50 shadow-md ring-2 ring-green-200"
@@ -430,12 +444,16 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                 )}
             </div>
 
+            {error && (
+                <div className="text-red-500 text-sm">{error}</div>
+            )}
+
             {/* Next Button */}
             <div className="flex justify-end pt-4">
                 <button
                     type="button"
-                    onClick={onNext}
-                    //disabled={!isFormValid}
+                    onClick={handleNext}
+                    disabled={!selectedSessionId}
                     className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 >
                     Next

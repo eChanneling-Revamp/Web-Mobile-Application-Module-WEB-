@@ -36,7 +36,7 @@ export async function registerUser(validatedData: SignupInput) {
         // check the employee id in the employees table
         const employee = await prisma.corporate_employees.findUnique({
             where: {
-                employeeId: validatedData.employee_id,
+                employeeid: validatedData.employee_id,
             },
         });
 
@@ -128,6 +128,7 @@ export async function registerUser(validatedData: SignupInput) {
                 name: user.name,
                 email: user.email,
             },
+            userId: user.id,
             ...(authData.accessToken && {
                 accessToken: authData.accessToken,
             }),

@@ -9,7 +9,7 @@ export async function GET() {
       specialization: 'Cardiologist',
       date: '6/15/2023',
       time: '10:00 AM',
-      hospital: 'National Hospital, Colombo',
+      hospital: 'National Hospital,',
       type: 'In-Person',
       status: 'upcoming',
     },

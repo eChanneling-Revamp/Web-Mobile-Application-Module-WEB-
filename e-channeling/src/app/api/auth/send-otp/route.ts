@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 
         if (email) {
             const emailHtml = getOtpEmailHtml(otp);
-            await sendEmailOtp(identifier, otp, emailHtml);
+            await sendEmailOtp(identifier, "E-Channeling Verification", emailHtml);
         }
 
         // if (phone) {

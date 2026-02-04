@@ -11,6 +11,8 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
+        console.log("Body", body)
+
         // rate limiting
         const forwarded = request.headers.get("x-forwarded-for");
         const ip = forwarded ? forwarded.split(",")[0] : "unknown";
@@ -28,6 +30,7 @@ export async function POST(request: Request) {
         try {
             validatedData = bookingSchema.parse(body);
         } catch (error) {
+            console.log("validation error , ",error)
             if (error instanceof ZodError) {
                 // Return the first validation error message
                 const firstError = error.issues[0];
@@ -50,7 +53,7 @@ export async function POST(request: Request) {
             patientEmail: appointment.patientEmail,
             patientPhone: appointment.patientPhone,
             patientNIC: appointment.patientNIC,
-            patientDateOfBirth: appointment.patientDateOfBirth,
+            patientAge: appointment.patientAge,
             patientGender: appointment.patientGender,
             status: appointment.status,
             consultationFee: appointment.consultationFee,
@@ -67,6 +70,7 @@ export async function POST(request: Request) {
             { status: 201 }
         );
     } catch (error: any) {
+        console.log(error);
         return NextResponse.json(
             {
                 success: false,

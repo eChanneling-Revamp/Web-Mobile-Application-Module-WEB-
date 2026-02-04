@@ -31,19 +31,19 @@ export const StepForWhom: React.FC<StepForWhomProps> = ({ onPrev, onNext }) => {
             </h2>
 
             {/* Selection Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mx-5">
                 {/* For You Card */}
                 <button
                     type="button"
                     onClick={() => handleSelection("myself")}
-                    className={`rounded-3xl border-2 p-6 text-center transition-all duration-200 ${
+                    className={`rounded-3xl border-2 p-6 text-center transition-all duration-200 cursor-pointer ${
                         forWhom === "myself"
                             ? "border-green-500 bg-green-50 shadow-md"
                             : "border-gray-300 bg-white hover:border-green-300 hover:shadow-sm"
                     }`}
                 >
                     <div className="flex flex-col items-center gap-4">
-                        <div className="text-6xl">👤</div>
+                        <div className="text-5xl">👤</div>
                         <h3 className="text-xl font-bold text-gray-900">
                             For You
                         </h3>
@@ -58,14 +58,14 @@ export const StepForWhom: React.FC<StepForWhomProps> = ({ onPrev, onNext }) => {
                 <button
                     type="button"
                     onClick={() => handleSelection("someone_else")}
-                    className={`rounded-3xl border-2 p-6 text-center transition-all duration-200 ${
+                    className={`rounded-3xl border-2 p-6 text-center transition-all duration-200 cursor-pointer ${
                         forWhom === "someone_else"
                             ? "border-green-500 bg-green-50 shadow-md"
                             : "border-gray-300 bg-white hover:border-green-300 hover:shadow-sm"
                     }`}
                 >
                     <div className="flex flex-col items-center gap-4">
-                        <div className="text-6xl">👥</div>
+                        <div className="text-5xl">👥</div>
                         <h3 className="text-xl font-bold text-gray-900">
                             For Someone Else
                         </h3>

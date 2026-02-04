@@ -35,74 +35,45 @@ const PaymentsHistoryPage: React.FC = () => {
         <p className="text-gray-600 mt-1 text-sm md:text-base">View your payment and refund records</p>
       </div>
 
-      {/* Payment History Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Doctor Name
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Bank Name
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Fee (LKR)
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {payments.map((payment) => (
-              <tr key={payment.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{payment.doctorName}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{payment.bankName}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">LKR {payment.fee.toFixed(2)}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {payment.date}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(payment.status)}`}>
-                    {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Summary */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-blue-800">Total Payments</h3>
-          <p className="text-2xl font-bold text-blue-900 mt-1">
-            LKR {payments.reduce((sum, p) => sum + p.fee, 0).toFixed(2)}
-          </p>
-        </div>
-        <div className="bg-green-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-green-800">Completed</h3>
-          <p className="text-2xl font-bold text-green-900 mt-1">
-            {payments.filter(p => p.status === 'completed').length}
-          </p>
-        </div>
-        <div className="bg-yellow-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-yellow-800">Pending</h3>
-          <p className="text-2xl font-bold text-yellow-900 mt-1">
-            {payments.filter(p => p.status === 'pending').length}
-          </p>
-        </div>
+      {/* Payment History Cards - Full Width */}
+      <div className="flex flex-col gap-6">
+        {payments.map((payment) => (
+          <div
+            key={payment.id}
+            className="w-full bg-white rounded-xl shadow p-6 flex flex-col gap-3 border border-gray-100 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col">
+                <span className="font-medium text-sm text-gray-500">Appointment Number</span>
+                <span className="text-[16px] font-semibold text-gray-900">APPT-2023-00{payment.id}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-sm text-gray-500">Doctor</span>
+                <span className="text-[16px] font-semibold text-gray-900">{payment.doctorName}</span>
+              </div>
+              <span className={`px-3 py-1 text-xs font-bold rounded-full ${getStatusColor(payment.status)}`}>
+                {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 w-full">
+              <div>
+                <span className="block text-[14px] text-gray-500 font-medium">Bank Name</span>
+                <span className="block text-[16px] font-semibold mt-1 text-gray-800">{payment.bankName}</span>
+              </div>
+              <div>
+                <span className="block text-[14px] text-gray-500 font-medium">Date</span>
+                <span className="block text-[16px] font-semibold mt-1 text-gray-800">{payment.date}</span>
+              </div>
+              <div>
+                <span className="block text-[14px] text-gray-500 font-medium">Fee</span>
+                <span className="block text-[16px] font-semibold mt-1 text-gray-800">LKR {payment.fee.toFixed(2)}</span>
+              </div>
+              <div className="flex md:hidden items-center">
+                {/* Optionally add a mobile-only status indicator or icon here if needed */}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

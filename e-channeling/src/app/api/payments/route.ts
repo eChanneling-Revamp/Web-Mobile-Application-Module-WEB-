@@ -1,5 +1,7 @@
+import { getReceiptHtml } from "@/lib/utils/getReceiptHtml";
 import { rateLimit } from "@/lib/utils/rateLimit";
 import { updatePaymentStatus } from "@/services/booking/booking.service";
+import { sendEmailOtp } from "@/services/notification/sendEmailOtp";
 import {
     PaymentInput,
     paymentSchema,
@@ -9,7 +11,10 @@ import { ZodError } from "zod";
 
 export async function POST(request: Request) {
     try {
+        console.log("Payment Endpoint ")
+
         const body = await request.json();
+        console.log(body)
 
         // rate limiting
         const forwarded = request.headers.get("x-forwarded-for");
@@ -58,6 +63,13 @@ export async function POST(request: Request) {
         const updateAppointment = await updatePaymentStatus(
             validatedData.appointmentNumber
         );
+
+        const email = updateAppointment.patientEmail
+
+        if (updateAppointment) {
+            const receiptHtml = getReceiptHtml(updateAppointment);
+            await sendEmailOtp(email, "Appointment Confirmed", receiptHtml);
+        }
 
         return NextResponse.json(
             {

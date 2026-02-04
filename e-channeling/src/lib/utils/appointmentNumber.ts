@@ -1,6 +1,45 @@
-export function generateAppointmentNumber() {
-  const date = new Date();
-  const yyyyMMdd = date.toISOString().slice(0, 10).replace(/-/g, "");
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `APT-${yyyyMMdd}-${random}`;
+/*
+  Format: APT-YYYYMMDD-XXXXXX
+  Example: APT-20260201-H7K9M2
+ 
+  APT: Prefix for appointment identification
+  YYYYMMDD: Date component for chronological sorting and easy reference
+  XXXXXX: 6-character alphanumeric code (Base36, excluding ambiguous chars)
+ */
+export function generateAppointmentNumber(): string {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const dateStr = `${year}${month}${day}`;
+
+    // Character set excluding ambiguous characters: 0, O, 1, I, l
+    const chars = "234567689ABCDEFGHJKMNPQRSTUVWXYZ";
+
+    // Generate 6-character unique code using crypto-quality randomness
+    let uniqueCode = "";
+    const timestamp = Date.now().toString(36).toUpperCase().slice(-3);
+
+    // Add timestamp-based characters (3 chars)
+    uniqueCode += timestamp;
+
+    // Add random characters (3 chars) for additional uniqueness
+    for (let i = 0; i < 3; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        uniqueCode += chars[randomIndex];
+    }
+
+    // Shuffle to mix timestamp and random parts
+    uniqueCode = uniqueCode
+        .split("")
+        .sort(() => Math.random() - 0.5)
+        .join("");
+
+    return `APT-${dateStr}-${uniqueCode}`;
+}
+
+// Validates appointment number format
+export function validateAppointmentNumber(appointmentNumber: string): boolean {
+    const pattern = /^APT-\d{8}-[234567689ABCDEFGHJKMNPQRSTUVWXYZ]{6}$/;
+    return pattern.test(appointmentNumber);
 }

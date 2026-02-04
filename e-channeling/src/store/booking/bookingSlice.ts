@@ -3,14 +3,8 @@ import api from "@/lib/utils/api";
 import type {
     BookingState,
     Doctor,
-    Hospital,
-    AvailableDate,
-    SessionSlot,
-    SessionCard,
     CreateBookingRequest,
     CreateBookingResponse,
-    PaymentRequest,
-    PaymentResponse,
     Gender,
     Session,
     User,
@@ -25,6 +19,8 @@ const initialState: BookingState = {
     selectedDate: null,
     selectedSessionName: null,
     selectedSessionStartTime: null,
+
+    //-------------------------------
 
     selectedDoctorId: null,
     selectedSessionId: null,
@@ -53,19 +49,14 @@ const initialState: BookingState = {
         phone: "",
         email: "",
         nic: "",
-        dateOfBirth: "",
+        age: 0,
         gender: "",
-        emergencyContactPhone: "",
         disease: "",
     },
 
-    // Step 4
-    paymentDetails: {
-        cardNumber: "",
-        cardHolderName: "",
-        expiryDate: "",
-        cvv: "",
-    },
+    isCreateBookingSuccess: false,
+    createBookingLoading: false,
+    createBookingError: "",
 
     // Confirmation
     confirmationData: null,
@@ -76,7 +67,7 @@ const initialState: BookingState = {
 
     // Errors
     bookingError: null,
-    paymentError: null,
+
 };
 
 // Fetch doctor details by ID
@@ -113,22 +104,7 @@ export const sessionsByDoctorId = createAsyncThunk<
     }
 });
 
-// get user information (for you)
-export const fetchUserDetails = createAsyncThunk<
-    User,
-    string | null,
-    { rejectValue: string }
->("booking/fetchUserDetails", async (userId, { rejectWithValue }) => {
-    try {
-        const response = await api.get(`/user/${userId}`);
-        return response.data.data;
-    } catch (error: unknown) {
-        const err = error as { response?: { data?: { message?: string } } };
-        return rejectWithValue(
-            err.response?.data?.message || "Failed to fetch user details"
-        );
-    }
-});
+
 
 // // Search sessions - INTEGRATED WITH BACKEND
 // // Uses backend GET /api/search with filters
@@ -167,7 +143,7 @@ export const fetchUserDetails = createAsyncThunk<
 // Create booking - INTEGRATED WITH BACKEND
 export const createBooking = createAsyncThunk<
     CreateBookingResponse,
-    { userId: string },
+    { userId: string | null },
     { rejectValue: string }
 >(
     "booking/createBooking",
@@ -185,7 +161,7 @@ export const createBooking = createAsyncThunk<
                 !patientDetails.fullName ||
                 !patientDetails.phone ||
                 !patientDetails.nic ||
-                !patientDetails.dateOfBirth ||
+                !patientDetails.age ||
                 !patientDetails.gender
             ) {
                 throw new Error("All required patient details must be filled");
@@ -198,76 +174,25 @@ export const createBooking = createAsyncThunk<
                 patientEmail: patientDetails.email || "",
                 patientPhone: patientDetails.phone,
                 patientNIC: patientDetails.nic,
-                patientDateOfBirth: patientDetails.dateOfBirth,
+                patientAge: patientDetails.age,
                 patientGender: patientDetails.gender as Gender,
-                emergencyContactPhone:
-                    patientDetails.emergencyContactPhone || undefined,
+                medicalReport: patientDetails.disease,
             };
 
-            const response = await api.post<CreateBookingResponse>(
-                "/bookings",
-                requestData
-            );
-            return response.data;
+            console.log("requestData ", requestData);
+
+            const response = await api.post("/bookings", requestData);
+            return response.data.data;
         } catch (error: any) {
             return rejectWithValue(
-                error.response?.data?.error ||
-                    error.message ||
-                    "Failed to create booking"
+                error.response?.data?.message ||
+                "Failed to create booking"
             );
         }
     }
 );
 
-// Process payment - INTEGRATED WITH BACKEND
-export const processPayment = createAsyncThunk<
-    PaymentResponse,
-    { appointmentNumber: string; amount: number },
-    { rejectValue: string }
->(
-    "booking/processPayment",
-    async ({ appointmentNumber, amount }, { getState, rejectWithValue }) => {
-        try {
-            const state = getState() as { booking: BookingState };
-            const { paymentDetails } = state.booking;
 
-            // Validate payment details
-            if (
-                !paymentDetails.cardNumber ||
-                !paymentDetails.cardHolderName ||
-                !paymentDetails.expiryDate ||
-                !paymentDetails.cvv
-            ) {
-                throw new Error("All payment details must be filled");
-            }
-
-            // Remove spaces from card number for backend
-            const cleanCardNumber = paymentDetails.cardNumber.replace(
-                /\s/g,
-                ""
-            );
-
-            const requestData: PaymentRequest = {
-                appointmentNumber,
-                amount,
-                cardNumber: cleanCardNumber,
-                cardHolderName: paymentDetails.cardHolderName,
-                expiryDate: paymentDetails.expiryDate,
-                cvv: paymentDetails.cvv,
-            };
-
-            const response = await api.post<PaymentResponse>(
-                "/payments",
-                requestData
-            );
-            return response.data;
-        } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.error || error.message || "Payment failed"
-            );
-        }
-    }
-);
 
 // ==================== SLICE ====================
 
@@ -288,7 +213,7 @@ const bookingSlice = createSlice({
         setSelectedDate: (state, action: PayloadAction<string>) => {
             state.selectedDate = action.payload;
         },
-        setSelectedSessionId: (state, action: PayloadAction<string>) => {
+        setSelectedSessionId: (state, action: PayloadAction<string | null>) => {
             state.selectedSessionId = action.payload;
         },
         // Set all session details at once when card is selected
@@ -328,23 +253,28 @@ const bookingSlice = createSlice({
             };
         },
 
-        // Step 4 actions
-        setPaymentDetails: (
-            state,
-            action: PayloadAction<Partial<BookingState["paymentDetails"]>>
-        ) => {
-            state.paymentDetails = {
-                ...state.paymentDetails,
-                ...action.payload,
-            };
-        },
-
         // Clear errors
         clearBookingError: (state) => {
             state.bookingError = null;
         },
-        clearPaymentError: (state) => {
-            state.paymentError = null;
+        // Clear booking success flag
+        clearBookingSuccess: (state) => {
+            state.isCreateBookingSuccess = false;
+        },
+
+        // Clear patient details
+        clearPatientDetails: (state) => {
+            state.patientDetails = {
+                fullName: "",
+                phone: "",
+                email: "",
+                nic: "",
+                age: 0,
+                gender: "",
+                disease: "",
+            };
+            state.selectedSessionId = null;
+            state.forWhom = null;
         },
 
         // Reset booking
@@ -384,21 +314,6 @@ const bookingSlice = createSlice({
                     action.payload || "Failed to fetch doctor";
             })
 
-            // fetch user details
-            .addCase(fetchUserDetails.pending, (state) => {
-                state.fetchUserDetailsdLoading = true;
-                state.fetchUserDetailsIdError = null;
-            })
-            .addCase(fetchUserDetails.fulfilled, (state, action) => {
-                state.fetchUserDetailsdLoading = false;
-                state.fetchUserDetailsIdError = null;
-                state.user = action.payload;
-            })
-            .addCase(fetchUserDetails.rejected, (state, action) => {
-                state.fetchUserDetailsdLoading = false;
-                state.fetchUserDetailsIdError =
-                    action.payload || "Failed to fetch user details";
-            })
 
             // Search sessions
 
@@ -417,31 +332,20 @@ const bookingSlice = createSlice({
 
             // Create booking
             .addCase(createBooking.pending, (state) => {
-                state.isCreatingBooking = true;
-                state.bookingError = null;
+                state.createBookingLoading = true;
+                state.createBookingError = null;
             })
             .addCase(createBooking.fulfilled, (state, action) => {
-                state.isCreatingBooking = false;
+                state.createBookingLoading = false;
+                state.createBookingError = null;
+                state.isCreateBookingSuccess = true;
                 state.confirmationData = action.payload;
             })
             .addCase(createBooking.rejected, (state, action) => {
-                state.isCreatingBooking = false;
-                state.bookingError =
+                state.createBookingLoading = false;
+                state.createBookingError =
                     action.payload || "Failed to create booking";
             })
-
-            // Process payment
-            .addCase(processPayment.pending, (state) => {
-                state.isProcessingPayment = true;
-                state.paymentError = null;
-            })
-            .addCase(processPayment.fulfilled, (state) => {
-                state.isProcessingPayment = false;
-            })
-            .addCase(processPayment.rejected, (state, action) => {
-                state.isProcessingPayment = false;
-                state.paymentError = action.payload || "Payment failed";
-            });
     },
 });
 
@@ -454,10 +358,10 @@ export const {
     setSelectedSessionCard,
     setForWhom,
     setPatientDetails,
-    setPaymentDetails,
     clearBookingError,
-    clearPaymentError,
+    clearBookingSuccess,
     resetBooking,
+    clearPatientDetails,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

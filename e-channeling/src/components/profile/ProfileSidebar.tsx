@@ -117,7 +117,7 @@ export default function ProfileSidebar() {
                     {/* Profile Circle Container */}
                     <div className="relative inline-block">
                         {/* Profile Circle */}
-                        <div className="relative cursor-pointer mx-auto mb-3">
+                        <div className="relative cursor-pointer mx-auto ml-4 mb-3">
                             <div className="relative w-24 h-24 rounded-full">
                                 {profilePhoto ? (
                                     <div className="w-full h-full rounded-full overflow-hidden border-2 border-blue-100">

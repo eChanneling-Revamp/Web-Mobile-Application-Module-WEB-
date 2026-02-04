@@ -7,6 +7,7 @@ import {
     searchDoctors,
     type SearchFilters,
 } from "@/store/search/searchSlice";
+import { fetchHospitals } from "@/store/hospitals/hospitalsSlice";
 import {
     Search,
     Calendar,
@@ -17,22 +18,10 @@ import {
     Stethoscope,
 } from "lucide-react";
 import { DoctorCard, DoctorCardSkeleton } from "@/components/search/DoctorCard";
+import { specializations } from "@/constants/specializations";
 
-// Hospital options with IDs
-const HOSPITALS = [
-    { id: "cmigxd6a40000v4n4b5tqtpbs", name: "Durdan" },
-    {
-        id: "cmihxkds10001v4p6j8a0tq9r",
-        name: "Sri Jayewardenepura General Hospital",
-    },
-    { id: "cmihxkds20002v4p8k4b9u1ls", name: "Kandy General Hospital" },
-    {
-        id: "cmihxkds30003v4pb8s9rtzqw",
-        name: "Lady Ridgeway Hospital for Children",
-    },
-    { id: "cmihxkds40004v4pd2tq8amrx", name: "National Hospital of Sri Lanka" },
-    { id: "cmiszgzoy0000v404s822jm9c", name: "Asiri Hospital" },
-];
+// make the specializations array alphabetically
+specializations.sort((a, b) => a.localeCompare(b)); 
 
 // Sri Lankan 25 Districts
 const DISTRICTS = [
@@ -63,19 +52,6 @@ const DISTRICTS = [
     "Vavuniya",
 ];
 
-// Specializations
-const SPECIALIZATIONS = [
-    "Hematology",
-    "Psychiatry",
-    "Gastroenterology",
-    "Nephrology",
-    "Geriatrics",
-    "Obstetrics and Gynecology",
-    "Cardiology",
-    "Endocrinology",
-    "Surgery",
-];
-
 // Hospital Types
 const HOSPITAL_TYPES = [
     { label: "Government", value: "GOVERNMENT" },
@@ -93,6 +69,9 @@ export default function SearchPage() {
         totalPages,
     } = useSelector((state: RootState) => state.search);
 
+    // Get hospitals from Redux store
+    const { hospitals } = useSelector((state: RootState) => state.hospitals);
+
     // Filter states
     const [keyword, setKeyword] = useState("");
     const [specialtyId, setSpecialtyId] = useState("");
@@ -103,6 +82,11 @@ export default function SearchPage() {
     const [page, setPage] = useState(1);
     const [hasSearched, setHasSearched] = useState(false);
     const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+    // Fetch hospitals on component mount
+    useEffect(() => {
+        dispatch(fetchHospitals());
+    }, [dispatch]);
 
     // Fetch all doctors on initial load
     useEffect(() => {
@@ -296,7 +280,7 @@ export default function SearchPage() {
                                         <option value="">
                                             All Specialties
                                         </option>
-                                        {SPECIALIZATIONS.map((spec) => (
+                                        {specializations.map((spec) => (
                                             <option key={spec} value={spec}>
                                                 {spec}
                                             </option>
@@ -359,7 +343,7 @@ export default function SearchPage() {
                                         }
                                     >
                                         <option value="">All Hospitals</option>
-                                        {HOSPITALS.map((hospital) => (
+                                        {hospitals.map((hospital) => (
                                             <option
                                                 key={hospital.id}
                                                 value={hospital.id}
@@ -512,11 +496,11 @@ export default function SearchPage() {
                                                     if (
                                                         pageNum === 1 ||
                                                         pageNum ===
-                                                            totalPages ||
+                                                        totalPages ||
                                                         (pageNum >=
                                                             currentPage - 1 &&
                                                             pageNum <=
-                                                                currentPage + 1)
+                                                            currentPage + 1)
                                                     ) {
                                                         return (
                                                             <button
@@ -529,21 +513,20 @@ export default function SearchPage() {
                                                                 disabled={
                                                                     loading
                                                                 }
-                                                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                                                                    currentPage ===
+                                                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${currentPage ===
                                                                     pageNum
-                                                                        ? "bg-green-500 text-white"
-                                                                        : "bg-white border border-gray-300 hover:bg-gray-50 text-gray-700"
-                                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                                    ? "bg-green-500 text-white"
+                                                                    : "bg-white border border-gray-300 hover:bg-gray-50 text-gray-700"
+                                                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                                                             >
                                                                 {pageNum}
                                                             </button>
                                                         );
                                                     } else if (
                                                         pageNum ===
-                                                            currentPage - 2 ||
+                                                        currentPage - 2 ||
                                                         pageNum ===
-                                                            currentPage + 2
+                                                        currentPage + 2
                                                     ) {
                                                         return (
                                                             <span

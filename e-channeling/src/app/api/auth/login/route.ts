@@ -1,3 +1,4 @@
+import prisma from "@/lib/db/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -17,6 +18,17 @@ export async function POST(request: NextRequest) {
 
         const data = await response.json();
 
+        // get the id only from the user table and await the result
+        const userRecord = await prisma.users.findUnique({
+            where: {
+                authUserId: data.user.id,
+            },
+            select: {
+                id: true,
+            },
+        });
+        const userId = userRecord ? userRecord.id : null;
+
         if (!response.ok) {
             return NextResponse.json(
                 { error: data.error || "Login failed" },
@@ -28,6 +40,7 @@ export async function POST(request: NextRequest) {
             {
                 message: data.message,
                 user: data.user,
+                userId: userId,
                 accessToken: data.accessToken,
             },
             { status: 200 }

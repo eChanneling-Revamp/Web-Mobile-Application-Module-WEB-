@@ -5,6 +5,9 @@ import bookingReducer from "@/store/booking/bookingSlice";
 import searchReducer from "@/store/search/searchSlice";
 import profileReducer from "./profile/profileSlice";
 import notificationReducer from "@/store/notifications/notificationSlice";
+import hospitalsReducer from "@/store/hospitals/hospitalsSlice";
+import paymentReducer from "@/store/payment/paymentSlice";
+import userReducer from "@/store/user/userSlice";
 import runningNumberReducer from "@/store/running-number/runningNumberSlice";
 
 export const store = configureStore({
@@ -15,6 +18,9 @@ export const store = configureStore({
         booking: bookingReducer,
         search: searchReducer,
         notifications: notificationReducer,
+        hospitals: hospitalsReducer,
+        payment: paymentReducer,
+        user: userReducer,
         runningNumber: runningNumberReducer,
     },
 });

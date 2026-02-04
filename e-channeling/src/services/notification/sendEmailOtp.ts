@@ -16,7 +16,7 @@ export const transporter = nodemailer.createTransport({
 
 //const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const sendEmailOtp = async (to: string, otp: string, html: string) => {
+export const sendEmailOtp = async (to: string, subject: string, html: string) => {
     await sgMail.send({
         //from: "Auth <onboarding@resend.dev>",
         from: {
@@ -24,7 +24,7 @@ export const sendEmailOtp = async (to: string, otp: string, html: string) => {
             name: "eChanneling",
         },
         to,
-        subject: "E-Channeling Verification",
+        subject,
         html,
     });
 };

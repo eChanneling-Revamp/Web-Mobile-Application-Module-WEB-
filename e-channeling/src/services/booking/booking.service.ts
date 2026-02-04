@@ -6,6 +6,21 @@ import { v4 as UUIDv4 } from "uuid";
 // create appointment
 export async function createBooking(data: Readonly<CreateBookingInput>) {
     return await prisma.$transaction(async (tx) => {
+
+        // if userId is provided, verify user exists
+        if (data.userId !== null) {
+
+            const user = await tx.users.findUnique({
+                where: { id: data.userId },
+            });
+
+            if (!user) {
+                throw new Error(
+                    "User not found. Please ensure you are logged in.",
+                );
+            }
+        }
+
         // check session is still AVAILABLE
         const session = await tx.sessions.findUnique({
             where: { id: data.sessionId },
@@ -14,7 +29,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
             },
         });
 
-        if (!session || session.status !== "scheduled") {
+        if (!session || session.status !== "SCHEDULED") {
             throw new Error("Session not available");
         }
 
@@ -30,7 +45,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         const hasActiveBooking = patientAppointments.some(
             (activeBooking) =>
                 activeBooking.sessionId === data.sessionId &&
-                ["CONFIRMED"].includes(activeBooking.status)
+                ["CONFIRMED"].includes(activeBooking.status),
         );
 
         if (hasActiveBooking) {
@@ -53,20 +68,19 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
 
         if (newQueuePosition > session.capacity) {
             throw new Error(
-                "Session capacity reached. Cannot book more appointments."
+                "Session capacity reached. Cannot book more appointments.",
             );
         }
 
-        const userId = UUIDv4();
+        const appointmentId = UUIDv4();
         const appointmentNumber = generateAppointmentNumber();
         const consultationFee = session.doctors.consultationFee;
-        const patientDateOfBirth = new Date(data.patientDateOfBirth);
 
         const appointment = await tx.appointments.create({
             data: {
-                id: userId,
+                id: appointmentId,
                 appointmentNumber: appointmentNumber,
-                bookedById: data.userId,
+                bookedById: data.userId || null,
                 sessionId: data.sessionId,
                 isNewPatient: newPatient,
                 patientName: data.patientName,
@@ -74,15 +88,13 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
                 patientPhone: data.patientPhone,
                 patientNIC: data.patientNIC,
                 patientGender: data.patientGender,
-                patientDateOfBirth: patientDateOfBirth,
-                // emergencyContactPhone: "",
-                medicalReportUrl: "",
-                status: "UNPAID",
+                patientAge: data.patientAge,
+                medicalReportUrl: data.medicalReport || null,
+                status: "CONFIRMED",
                 consultationFee: consultationFee,
                 totalAmount: consultationFee,
                 paymentStatus: "PENDING",
                 queuePosition: newQueuePosition,
-                createdAt: new Date(),
                 updatedAt: new Date(),
             },
         });
@@ -112,11 +124,9 @@ export async function updateBooking(id: string, data: any) {
             },
         });
 
-        if (!appoinment || appoinment.sessions.status !== "scheduled") {
+        if (!appoinment || appoinment.sessions.status !== "SCHEDULED") {
             throw new Error("Session not available for updates");
         }
-
-        const patientDateOfBirth = new Date(data.patientDateOfBirth);
 
         const updatedBooking = await tx.appointments.update({
             where: {
@@ -124,7 +134,7 @@ export async function updateBooking(id: string, data: any) {
             },
             data: {
                 ...data,
-                patientDateOfBirth: patientDateOfBirth,
+                patientAge: data.patientAge,
                 updatedAt: new Date(),
             },
         });
@@ -135,7 +145,8 @@ export async function updateBooking(id: string, data: any) {
 // update payment status
 export async function updatePaymentStatus(id: string) {
     return await prisma.$transaction(async (tx) => {
-        const appoinment = await tx.appointments.findUnique({
+        // First, verify the appointment exists
+        const appointment = await tx.appointments.findUnique({
             where: {
                 appointmentNumber: id,
             },
@@ -144,20 +155,70 @@ export async function updatePaymentStatus(id: string) {
             },
         });
 
-        if (!appoinment || appoinment.sessions.status !== "scheduled") {
+        if (!appointment) {
+            throw new Error(`Appointment with number ${id} not found`);
+        }
+
+        if (appointment.sessions.status !== "SCHEDULED") {
             throw new Error("Session not available for updates");
         }
 
+        // Prevent duplicate payment updates
+        if (appointment.paymentStatus === "COMPLETED") {
+            throw new Error(
+                "Payment has already been completed for this appointment",
+            );
+        }
+
+        // Update the existing appointment record
         const updatedBooking = await tx.appointments.update({
             where: {
-                appointmentNumber: id,
+                appointmentNumber: id, // Use the primary key for the update to ensure we're updating the exact record
             },
             data: {
                 status: "CONFIRMED",
                 paymentStatus: "COMPLETED",
                 updatedAt: new Date(),
             },
+            select: {
+                id: true,
+                appointmentNumber: true,
+                bookedById: true,
+                sessionId: true,
+                isNewPatient: true,
+                patientName: true,
+                patientEmail: true,
+                patientPhone: true,
+                patientNIC: true,
+                patientGender: true,
+                patientAge: true,
+                medicalReportUrl: true,
+                status: true,
+                consultationFee: true,
+                totalAmount: true,
+                paymentStatus: true,
+                queuePosition: true,
+                createdAt: true,
+                updatedAt: true,
+                sessions: {
+                    select: {
+                        scheduledAt: true,
+                        startTime: true,
+                        doctors: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        hospitals: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
+
         return updatedBooking;
     });
 }

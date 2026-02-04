@@ -16,46 +16,80 @@ interface Appointment {
 
 
 const AppointmentCard: React.FC<{ appointment: Appointment }> = ({ appointment }) => {
+  const statusColor = {
+    upcoming: "bg-blue-100 text-blue-700 border-blue-300",
+    past: "bg-green-100 text-green-700 border-green-300",
+    cancelled: "bg-red-100 text-red-700 border-red-300",
+  }[appointment.status];
+
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-      <div className="flex flex-col">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <span className="text-blue-600 font-semibold">
-              {appointment.doctorName.split(' ').map(n => n[0]).join('')}
-            </span>
+    <div className="relative bg-white border border-gray-200 rounded-2xl p-7 shadow-lg hover:shadow-2xl overflow-hidden">
+      {/* Badge for appointment status */}
+      <div
+        className={`absolute top-4 right-4 px-3 py-1 text-xs font-semibold rounded-full border ${statusColor}`}
+      >
+        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+      </div>
+
+      <div className="flex items-center space-x-5 mb-5">
+        {/* Avatar/Initials */}
+        <div className="w-14 h-14 bg-blue-200 rounded-full flex items-center justify-center shadow-lg">
+          <span className="text-[20px] font-bold text-blue-700 tracking-wide">
+            {appointment.doctorName
+              .split(' ')
+              .map(n => n[0])
+              .join('')
+              .slice(0, 2)
+            }
+          </span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <h3 className="text-[18px] font-bold text-gray-900">{appointment.doctorName}</h3>
+          <p className="text-blue-700 text-sm font-medium">{appointment.specialization}</p>
+          <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+            {appointment.type}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-5 mt-2">
+        {/* Date & Time */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center space-x-2 text-base">
+            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="font-semibold text-gray-800">Date:</span>
+            <span className="text-gray-700">{appointment.date}</span>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{appointment.doctorName}</h3>
-            <p className="text-gray-600">{appointment.specialization}</p>
+          <div className="flex items-center space-x-2 text-base">
+            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-semibold text-gray-800">Time:</span>
+            <span className="text-gray-700">{appointment.time}</span>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <div className="flex items-center text-gray-600 mb-1">
-              <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className="font-medium">Date:</span>
-              <span className="ml-2">{appointment.date}</span>
-            </div>
-            <div className="flex items-center text-gray-600 ml-7">
-              <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{appointment.time}</span>
-            </div>
+
+        {/* Patient */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center space-x-2 text-base">
+            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A8 8 0 1118.364 4.56M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="font-semibold text-gray-800">Patient:</span>
+            <span className="text-gray-700">{appointment.patientName}</span>
           </div>
-          
-          <div className="flex items-center text-gray-600">
-            <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        </div>
+
+        {/* Hospital */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center space-x-2 text-base">
+            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
-            <div>
-              <span className="font-medium">Hospital:</span>
-              <span className="ml-2">{appointment.hospital}</span>
-            </div>
+            <span className="font-semibold text-gray-800">Hospital:</span>
+            <span className="text-gray-700">{appointment.hospital}</span>
           </div>
         </div>
       </div>
