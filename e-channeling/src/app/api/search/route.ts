@@ -120,20 +120,22 @@ export async function GET(request: Request) {
         }
 
         // get the total count of the doctors matching the criteria
-        const totalCount = await prisma.doctors.count({
+        const totalCount = await prisma.doctor.count({
             where: whereClause,
         });
 
         const skip = (page - 1) * limit;
         const totalPages = Math.ceil(totalCount / limit);
 
-        const doctors = await prisma.doctors.findMany({
+        // ----- if getting errors in search doctors endpoint check this query -----
+        // i change "include doctor_hospitals" to hospitals 
+        const doctors = await prisma.doctor.findMany({
             where: whereClause,
             include: {
-                doctor_hospitals: {
+                hospitals: {
                     where: { isActive: true },
                     include: {
-                        hospitals: true,
+                        hospital: true,
                     },
                 },
                 sessions: date // if date is provided return only the session for that date

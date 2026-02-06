@@ -39,7 +39,7 @@ export const getReceiptHtml = (appointment: any) => {
 
                 <!-- Greeting -->
                 <p style="margin:0;font-size:16px;color:#333;line-height:1.6;">
-                    Dear <strong>${appointment.patientName || 'Patient'}</strong>,
+                    Dear <strong>${appointment.patientName || "Patient"}</strong>,
                 </p>
 
                 <p style="margin:15px 0 30px 0;font-size:15px;color:#555;line-height:1.6;">
@@ -65,7 +65,7 @@ export const getReceiptHtml = (appointment: any) => {
                         </tr>
                         <tr>
                             <td style="font-size:18px;color:#0d6efd;font-weight:700;">
-                            ${appointment.appointmentNumber || 'N/A'}
+                            ${appointment.appointmentNumber || "N/A"}
                             </td>
                         </tr>
                         </table>
@@ -83,7 +83,7 @@ export const getReceiptHtml = (appointment: any) => {
                                 🏥 Hospital
                                 </div>
                                 <div style="font-size:15px;color:#212529;font-weight:600;">
-                                ${appointment.sessions.hospitals.name || 'N/A'}
+                                ${appointment.session.hospitals.name || "N/A"}
                                 </div>
                             </div>
 
@@ -93,7 +93,7 @@ export const getReceiptHtml = (appointment: any) => {
                                 👤 Patient Name
                                 </div>
                                 <div style="font-size:15px;color:#212529;font-weight:600;">
-                                ${appointment.patientName || 'N/A'}
+                                ${appointment.patientName || "N/A"}
                                 </div>
                             </div>
 
@@ -103,7 +103,7 @@ export const getReceiptHtml = (appointment: any) => {
                                 🆔 Patient NIC
                                 </div>
                                 <div style="font-size:15px;color:#212529;font-weight:600;">
-                                ${appointment.patientNIC || 'N/A'}
+                                ${appointment.patientNIC || "N/A"}
                                 </div>
                             </div>
 
@@ -116,7 +116,7 @@ export const getReceiptHtml = (appointment: any) => {
                                 📋 Queue Position
                                 </div>
                                 <div style="font-size:15px;color:#212529;font-weight:600;">
-                                ${appointment.queuePosition || 'N/A'}
+                                ${appointment.queuePosition || "N/A"}
                                 </div>
                             </div>
 
@@ -126,7 +126,7 @@ export const getReceiptHtml = (appointment: any) => {
                                 👨‍⚕️ Doctor
                                 </div>
                                 <div style="font-size:15px;color:#212529;font-weight:600;">
-                                ${appointment.sessions.doctors.name|| 'N/A'}
+                                ${appointment.session.doctors.name || "N/A"}
                                 </div>
                             </div>
 
@@ -136,7 +136,7 @@ export const getReceiptHtml = (appointment: any) => {
                                 📅 Date
                                 </div>
                                 <div style="font-size:15px;color:#212529;font-weight:600;">
-                                ${appointment.sessions.scheduledAt ? new Date(appointment.sessions.scheduledAt).toLocaleDateString() : 'N/A'}
+                                ${appointment.session.scheduledAt ? new Date(appointment.session.scheduledAt).toLocaleDateString() : "N/A"}
                                 </div>
                             </div>
 
@@ -152,7 +152,7 @@ export const getReceiptHtml = (appointment: any) => {
                             ⏰ Time
                         </div>
                         <div style="font-size:15px;color:#212529;font-weight:600;">
-                            ${appointment.sessions.startTime ? new Date(appointment.sessions.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                            ${appointment.session.startTime ? new Date(appointment.session.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "N/A"}
                         </div>
                         </div>
 
@@ -162,12 +162,15 @@ export const getReceiptHtml = (appointment: any) => {
                             💳 Payment Status
                         </div>
                         <div style="display:inline-block;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;
-                            ${appointment.paymentStatus === 'COMPLETED' || appointment.paymentStatus === 'SUCCESS'
-            ? 'background:#d1f4e0;color:#0f5132;'
-            : appointment.paymentStatus === 'PENDING'
-                ? 'background:#fff3cd;color:#856404;'
-                : 'background:#f8d7da;color:#842029;'}">
-                            ${appointment.paymentStatus || 'PENDING'}
+                            ${
+                                appointment.paymentStatus === "COMPLETED" ||
+                                appointment.paymentStatus === "SUCCESS"
+                                    ? "background:#d1f4e0;color:#0f5132;"
+                                    : appointment.paymentStatus === "PENDING"
+                                      ? "background:#fff3cd;color:#856404;"
+                                      : "background:#f8d7da;color:#842029;"
+                            }">
+                            ${appointment.paymentStatus || "PENDING"}
                         </div>
                         </div>
 
@@ -218,7 +221,7 @@ export const getReceiptHtml = (appointment: any) => {
                 <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                     <td align="center" style="padding:10px 0 20px 0;">
-                        <a href="${appointment.appointmentUrl || '#'}" style="
+                        <a href="${appointment.appointmentUrl || "#"}" style="
                         display:inline-block;
                         padding:14px 32px;
                         background:#0d6efd;
@@ -278,4 +281,4 @@ export const getReceiptHtml = (appointment: any) => {
     </html>
 
     `;
-}
+};

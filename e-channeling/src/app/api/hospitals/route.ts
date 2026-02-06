@@ -16,7 +16,7 @@ export async function GET(request: Request) {
             );
         }
 
-        const hospitals = await prisma.hospitals.findMany({
+        const hospitals = await prisma.hospital.findMany({
             orderBy: {
                 name: 'asc',
             },

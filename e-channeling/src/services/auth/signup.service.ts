@@ -19,7 +19,7 @@ export async function registerUser(validatedData: SignupInput) {
     try {
         const contactNumber = `${validatedData.country_code}${validatedData.phone_number}`;
 
-        const existingUser = await prisma.users.findUnique({
+        const existingUser = await prisma.user.findUnique({
             where: {
                 email: validatedData.email,
                 contactNumber: contactNumber,
@@ -90,7 +90,7 @@ export async function registerUser(validatedData: SignupInput) {
         const userId = UUIDv4();
         const hashedPassword = await hash(validatedData.password, 12);
 
-        const user = await prisma.users.create({
+        const user = await prisma.user.create({
             data: {
                 id: userId,
                 authUserId: authUserId,

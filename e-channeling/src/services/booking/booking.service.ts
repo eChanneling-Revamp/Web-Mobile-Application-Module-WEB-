@@ -10,7 +10,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         // if userId is provided, verify user exists
         if (data.userId !== null) {
 
-            const user = await tx.users.findUnique({
+            const user = await tx.user.findUnique({
                 where: { id: data.userId },
             });
 
@@ -22,7 +22,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         }
 
         // check session is still AVAILABLE
-        const session = await tx.sessions.findUnique({
+        const session = await tx.session.findUnique({
             where: { id: data.sessionId },
             include: {
                 doctors: true,
@@ -34,7 +34,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         }
 
         // get all previous appointments for this patient
-        const patientAppointments = await tx.appointments.findMany({
+        const patientAppointments = await tx.appointment.findMany({
             where: {
                 patientNIC: data.patientNIC,
             },
@@ -55,7 +55,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         const newPatient = patientAppointments.length === 0;
 
         // get last token number
-        const lastTokenNumber = await tx.appointments.aggregate({
+        const lastTokenNumber = await tx.appointment.aggregate({
             where: {
                 sessionId: data.sessionId,
             },
@@ -76,7 +76,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
         const appointmentNumber = generateAppointmentNumber();
         const consultationFee = session.doctors.consultationFee;
 
-        const appointment = await tx.appointments.create({
+        const appointment = await tx.appointment.create({
             data: {
                 id: appointmentId,
                 appointmentNumber: appointmentNumber,
@@ -105,7 +105,7 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
 
 // get the appointments by user id
 export async function getBookingsById(id: string) {
-    return prisma.appointments.findMany({
+    return prisma.appointment.findMany({
         where: {
             bookedById: id,
         },
@@ -115,20 +115,20 @@ export async function getBookingsById(id: string) {
 // update the appointment by appoinment id
 export async function updateBooking(id: string, data: any) {
     return await prisma.$transaction(async (tx) => {
-        const appoinment = await tx.appointments.findUnique({
+        const appoinment = await tx.appointment.findUnique({
             where: {
                 appointmentNumber: id,
             },
             include: {
-                sessions: true,
+                session: true,
             },
         });
 
-        if (!appoinment || appoinment.sessions.status !== "SCHEDULED") {
+        if (!appoinment || appoinment.session.status !== "SCHEDULED") {
             throw new Error("Session not available for updates");
         }
 
-        const updatedBooking = await tx.appointments.update({
+        const updatedBooking = await tx.appointment.update({
             where: {
                 appointmentNumber: id,
             },
@@ -146,12 +146,12 @@ export async function updateBooking(id: string, data: any) {
 export async function updatePaymentStatus(id: string) {
     return await prisma.$transaction(async (tx) => {
         // First, verify the appointment exists
-        const appointment = await tx.appointments.findUnique({
+        const appointment = await tx.appointment.findUnique({
             where: {
                 appointmentNumber: id,
             },
             include: {
-                sessions: true,
+                session: true,
             },
         });
 
@@ -159,7 +159,7 @@ export async function updatePaymentStatus(id: string) {
             throw new Error(`Appointment with number ${id} not found`);
         }
 
-        if (appointment.sessions.status !== "SCHEDULED") {
+        if (appointment.session.status !== "SCHEDULED") {
             throw new Error("Session not available for updates");
         }
 
@@ -171,7 +171,7 @@ export async function updatePaymentStatus(id: string) {
         }
 
         // Update the existing appointment record
-        const updatedBooking = await tx.appointments.update({
+        const updatedBooking = await tx.appointment.update({
             where: {
                 appointmentNumber: id, // Use the primary key for the update to ensure we're updating the exact record
             },
@@ -200,7 +200,7 @@ export async function updatePaymentStatus(id: string) {
                 queuePosition: true,
                 createdAt: true,
                 updatedAt: true,
-                sessions: {
+                session: {
                     select: {
                         scheduledAt: true,
                         startTime: true,

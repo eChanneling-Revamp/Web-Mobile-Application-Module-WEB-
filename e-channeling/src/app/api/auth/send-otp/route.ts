@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         }
 
         if (email) {
-            const existingEmail = await prisma.users.findUnique({
+            const existingEmail = await prisma.user.findUnique({
                 where: { email: email },
             });
             if (existingEmail) {
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
         }
 
         if (phone) {
-            const existingPhone = await prisma.users.findFirst({
+            const existingPhone = await prisma.user.findFirst({
                 where: { contactNumber: phone },
             });
             if (existingPhone) {

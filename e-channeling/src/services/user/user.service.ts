@@ -3,7 +3,7 @@ import { UpdateUserInput } from "@/validations/user/updateUser.schema";
 
 // get all user information by ID
 export async function getUserById(id: string) {
-    return prisma.users.findUnique({
+    return prisma.user.findUnique({
         where: {
             id,
         },
@@ -49,7 +49,7 @@ export async function updateUserById(id: string, data: UpdateUserInput) {
         delete (updatedData as any).passport_number;
     }
 
-    const updateUser = prisma.users.update({
+    const updateUser = prisma.user.update({
         where: { id },
         data: updatedData,
         select: {
@@ -77,7 +77,7 @@ export async function updateUserById(id: string, data: UpdateUserInput) {
 
 // delete user by id
 export async function deleteUserById(id: string) {
-    return prisma.users.delete({
+    return prisma.user.delete({
         where: { id },
     });
 }

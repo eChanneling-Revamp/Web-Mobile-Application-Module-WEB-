@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         const data = await response.json();
 
         // get the id only from the user table and await the result
-        const userRecord = await prisma.users.findUnique({
+        const userRecord = await prisma.user.findUnique({
             where: {
                 authUserId: data.user.id,
             },

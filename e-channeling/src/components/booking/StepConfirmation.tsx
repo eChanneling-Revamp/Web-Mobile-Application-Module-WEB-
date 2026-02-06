@@ -49,13 +49,13 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
         generateAppointmentReceipt({
             appointmentNumber: updateAppointment.appointmentNumber,
             appointmentId: updateAppointment.appointmentId,
-            hospitalName: updateAppointment.sessions.hospitals.name,
+            hospitalName: updateAppointment.session.hospitals.name,
             queuePosition: updateAppointment.queuePosition,
             patientName: updateAppointment.patientName,
             patientNIC: updateAppointment.patientNIC,
-            doctorName: updateAppointment.sessions.doctors.name,
-            sessionDate: updateAppointment.sessions.scheduledAt,
-            sessionTime: updateAppointment.sessions.startTime,
+            doctorName: updateAppointment.session.doctors.name,
+            sessionDate: updateAppointment.session.scheduledAt,
+            sessionTime: updateAppointment.session.startTime,
             consultationFee: updateAppointment.consultationFee,
             platformFee: 200,
             paymentStatus: updateAppointment.paymentStatus,
@@ -149,7 +149,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Hospital:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {updateAppointment.sessions.hospitals.name}
+                                {updateAppointment.session.hospitals.name}
                             </span>
                         </div>
 
@@ -189,7 +189,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Doctor Name:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {updateAppointment.sessions.doctors.name}
+                                {updateAppointment.session.doctors.name}
                             </span>
                         </div>
 
@@ -199,7 +199,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Date:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {formatDate(updateAppointment.sessions.scheduledAt)}
+                                {formatDate(updateAppointment.session.scheduledAt)}
                             </span>
                         </div>
 
@@ -209,7 +209,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Time:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {formatTime(updateAppointment.sessions.startTime)}
+                                {formatTime(updateAppointment.session.startTime)}
                             </span>
                         </div>
 

@@ -11,10 +11,10 @@ import { ZodError } from "zod";
 
 export async function POST(request: Request) {
     try {
-        console.log("Payment Endpoint ")
+        console.log("Payment Endpoint ");
 
         const body = await request.json();
-        console.log(body)
+        console.log(body);
 
         // rate limiting
         const forwarded = request.headers.get("x-forwarded-for");
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
                 {
                     error: "Too many payments attempts. Please try again later.",
                 },
-                { status: 429 }
+                { status: 429 },
             );
         }
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
                 const firstError = error.issues[0];
                 return NextResponse.json(
                     { error: firstError.message },
-                    { status: 400 }
+                    { status: 400 },
                 );
             }
             throw error;
@@ -55,16 +55,16 @@ export async function POST(request: Request) {
                     data: payments,
                     message: "Payment Not Successful",
                 },
-                { status: 400 }
+                { status: 400 },
             );
         }
 
         // update payment status in the booking
         const updateAppointment = await updatePaymentStatus(
-            validatedData.appointmentNumber
+            validatedData.appointmentNumber,
         );
 
-        const email = updateAppointment.patientEmail
+        const email = updateAppointment.patientEmail;
 
         if (updateAppointment) {
             const receiptHtml = getReceiptHtml(updateAppointment);
@@ -77,15 +77,16 @@ export async function POST(request: Request) {
                 data: { payments, updateAppointment },
                 message: "Appointment Confirmed and Payment Successful",
             },
-            { status: 201 }
+            { status: 201 },
         );
     } catch (error: any) {
+        console.log("Payement Error -- ", error);
         return NextResponse.json(
             {
                 success: false,
                 message: error.message,
             },
-            { status: 400 }
+            { status: 400 },
         );
     }
 }
