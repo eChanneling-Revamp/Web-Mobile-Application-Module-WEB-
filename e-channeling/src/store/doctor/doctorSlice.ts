@@ -1,73 +1,97 @@
-import api from "@/lib/utils/api";
+import axios from "axios";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// doctor type
-interface Doctor {
-    id: string;
-    name: string;
-    hospital: string;
-    rating: number;
-    specialization: string;
-    availabilityColor: string;
-    availability: string;
-    reviews: string;
-    experience: number;
-    image: string;
+export interface HospitalInfo {
+  name: string;
+  city: string;
+}
+
+export type DoctorStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface DoctorDetails {
+  id: string;
+  name: string;
+  email: string;
+  specialization: string;
+  qualification: string;
+  experience: number;
+  phonenumber: string;
+  consultationFee: string; 
+  rating: string;          
+  profileImage: string;    
+  description: string;
+  languages: string[];
+  availableDays: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  status: DoctorStatus;
+  hospitalId: string[];
+  hospitals: HospitalInfo[];
+}
+
+interface DoctorApiResponse {
+  success: boolean;
+  data: DoctorDetails;
 }
 
 interface DoctorState {
-    doctors: Doctor[];
-    loading: boolean;
-    error: string | null;
+  selectedDoctor: DoctorDetails | null;
+  loading: boolean;
+  error: string | null;
 }
 
-// initial state
 const initialState: DoctorState = {
-    doctors: [],
-    loading: false,
-    error: null,
+  selectedDoctor: null,
+  loading: false,
+  error: null,
 };
 
-// fetch top rating doctors
-export const fetchTopRatedDoctors = createAsyncThunk<
-    Doctor[],
-    void,
-    { rejectValue: string }
->("doctor/fetchTopRatedDoctors", async (_, { rejectWithValue }) => {
-    try {
-        const response = await api.get("/topRatedDoctors");
-        return response.data;
-    } catch (error: unknown) {
-        const err = error as { response?: { data?: { message?: string } } };
-        return rejectWithValue(
-            err.response?.data?.message || "Failed to fetch top rated Doctors!"
-        );
-    }
+export const fetchDoctorDetails = createAsyncThunk<
+  DoctorDetails,
+  string,
+  { rejectValue: string }
+>("doctor/fetchDoctorDetails", async (doctorId, { rejectWithValue }) => {
+  try {
+    const response = await axios.get<DoctorApiResponse>(`/api/doctor/${doctorId}`);
+    return response.data.data; 
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { message?: string } } };
+    return rejectWithValue(
+      err.response?.data?.message || "Failed to fetch doctor details!"
+    );
+  }
 });
 
-// slice
 const doctorSlice = createSlice({
-    name: "doctor",
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchTopRatedDoctors.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(
-                fetchTopRatedDoctors.fulfilled,
-                (state, action: PayloadAction<Doctor[]>) => {
-                    state.loading = false;
-                    state.doctors = action.payload;
-                }
-            )
-            .addCase(fetchTopRatedDoctors.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload || "Something went wrong";
-            });
+  name: "doctor",
+  initialState,
+  reducers: {
+    clearSelectedDoctor: (state) => {
+      state.selectedDoctor = null;
+      state.error = null;
+      state.loading = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchDoctorDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchDoctorDetails.fulfilled,
+        (state, action: PayloadAction<DoctorDetails>) => {
+          state.loading = false;
+          state.selectedDoctor = action.payload;
+        }
+      )
+      .addCase(fetchDoctorDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Something went wrong";
+      });
+  },
 });
 
+export const { clearSelectedDoctor } = doctorSlice.actions;
 export default doctorSlice.reducer;
