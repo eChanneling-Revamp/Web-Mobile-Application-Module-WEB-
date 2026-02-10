@@ -62,7 +62,7 @@ export default function SearchPage() {
     const dispatch = useDispatch<AppDispatch>();
     const {
         doctors,
-        loading,
+        loading,        
         error,
         count,
         page: currentPage,
@@ -234,7 +234,7 @@ export default function SearchPage() {
 
     return (
         <div className="min-h-screen bg-[#e7e9f0]">
-            <section className="mx-auto max-w-[1400px] px-10 sm:px-6 lg:px-10 pt-4 sm:pt-6 lg:pt-8 pb-8">
+            <section className="mx-auto max-w-[1400px] px-10 sm:px-6 lg:px-10 pt-4 sm:pt-4 lg:pt-4 pb-4">
                 <div
                     className="relative rounded-2xl overflow-hidden shadow-sm text-center mb-6 "
                     style={{
@@ -242,16 +242,16 @@ export default function SearchPage() {
                             "linear-gradient(135deg,#099d9b 0%,#1b74e8 100%)",
                     }}
                 >
-                    <h1 className="text-white font-bold tracking-tight text-2xl sm:text-2xl md:text-3xl lg:text-4xl leading-tight drop-shadow-lg px-4 sm:px-6 pt-6 sm:pt-6">
+                    {/* <h1 className="text-white font-bold tracking-tight text-2xl sm:text-2xl md:text-3xl lg:text-[32px] leading-tight drop-shadow-lg px-4 sm:px-6 pt-3 sm:pt-4">
                         Your Health, Our Priority
-                    </h1>
-                    <p className="text-white/90 text-xs sm:text-sm md:text-[15px] px-4 sm:px-6 pb-2 mt-2 sm:mt-3">
+                    </h1> */}
+                    <p className="text-white text-[14px] sm:text-[18px] md:text-[20px] px-4 sm:px-6 pb-0 mt-2 sm:mt-5 font-semibold">
                         Find the best doctors using advanced filters tailored to
                         your needs.
                     </p>
 
                     {/* Search box */}
-                    <div className="w-full flex justify-center pb-6 sm:pb-8 pt-4 sm:pt-6">
+                    <div className="w-full flex justify-center pb-6  pt-4 sm:pt-6">
                         <div className="w-[90%] sm:w-[92%] xl:w-[1100px] bg-white/95 backdrop-blur rounded-xl shadow-md border border-white/70 p-3 sm:p-4">
                             <div className="mb-3 relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -400,9 +400,9 @@ export default function SearchPage() {
                     </div>
                 </div>
 
-                <div className="mt-10">
+                <div className="mt-8">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <h2 className="text-xl  font-bold text-gray-800 flex items-center gap-2">
                             <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />
                             Results
                         </h2>
@@ -426,7 +426,7 @@ export default function SearchPage() {
                     )}
 
                     {loading && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
                             {[...Array(8)].map((_, i) => (
                                 <DoctorCardSkeleton key={i} />
                             ))}
@@ -459,7 +459,7 @@ export default function SearchPage() {
                     {/* Results Grid */}
                     {!loading && !error && doctors.length > 0 && (
                         <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
                                 {doctors.map((doctor) => (
                                     <DoctorCard
                                         key={doctor.id}
