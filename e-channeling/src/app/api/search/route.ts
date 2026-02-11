@@ -44,9 +44,9 @@ export async function GET(request: Request) {
                     specialization: { contains: keyword, mode: "insensitive" },
                 },
                 {
-                    doctor_hospitals: {
+                    hospitals: {
                         some: {
-                            hospitals: {
+                            hospital: {
                                 name: {
                                     contains: keyword,
                                     mode: "insensitive",
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
         }
 
         if (hospitalId) {
-            whereClause.hospitalIds = {
+            whereClause.hospitalId = {
                 has: hospitalId,
             };
         }
@@ -92,10 +92,10 @@ export async function GET(request: Request) {
                 };
             }
 
-            whereClause.doctor_hospitals = {
+            whereClause.hospitals = {
                 some: {
                     isActive: true,
-                    hospitals: hospitalFilter,
+                    hospital: hospitalFilter,
                 },
             };
         }
@@ -128,7 +128,7 @@ export async function GET(request: Request) {
         const totalPages = Math.ceil(totalCount / limit);
 
         // ----- if getting errors in search doctors endpoint check this query -----
-        // i change "include doctor_hospitals" to hospitals 
+        // i change "include doctor_hospitals" to hospitals
         const doctors = await prisma.doctor.findMany({
             where: whereClause,
             include: {

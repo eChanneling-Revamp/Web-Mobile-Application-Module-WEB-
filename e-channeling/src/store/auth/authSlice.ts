@@ -1,3 +1,4 @@
+import { safeDecodeJwt } from "@/lib/utils/decodeJWT";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -95,18 +96,6 @@ interface OtpVerificationData {
     otp: string;
 }
 
-function safeDecodeJwt(token?: string | null) {
-    if (!token || typeof token !== "string") return null;
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    try {
-        const payload = JSON.parse(atob(parts[1]));
-        return payload;
-    } catch {
-        return null;
-    }
-}
-
 // intial state - Always start with null to avoid hydration mismatch
 const initialState: AuthState = {
     userToken: null,
@@ -197,7 +186,7 @@ export const login = createAsyncThunk<
         const err = error as { response?: { data?: { error?: string } } };
         return rejectWithValue(
             err.response?.data?.error ||
-                "An unexpected error occurred during login.",
+            "An unexpected error occurred during login.",
         );
     }
 });
@@ -225,7 +214,7 @@ const authSlice = createSlice({
                         state.isLoginSuccess = true;
                     } else {
                         // Token is invalid or expired, remove it
-                        localStorage.removeItem("token");
+                        localStorage.removeItem("accessToken");
                         localStorage.removeItem("userId");
                     }
                 }
@@ -251,6 +240,7 @@ const authSlice = createSlice({
             state.signupData = {};
             if (typeof window !== "undefined")
                 localStorage.removeItem("accessToken");
+                localStorage.removeItem("userId");
         },
         setSignupData: (state, action: PayloadAction<Partial<SignupData>>) => {
             state.signupData = { ...state.signupData, ...action.payload };

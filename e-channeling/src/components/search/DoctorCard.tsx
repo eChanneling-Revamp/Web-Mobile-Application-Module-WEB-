@@ -25,9 +25,9 @@ export const DoctorCard = ({ doctor }: { doctor: Doctor }) => {
     const router = useRouter();
 
     const hospitalNames = useMemo(() => {
-        if (doctor.doctor_hospitals && Array.isArray(doctor.doctor_hospitals)) {
-            return doctor.doctor_hospitals
-                .map((dh) => dh?.hospitals?.name)
+        if (doctor.hospitals && Array.isArray(doctor.hospitals)) {
+            return doctor.hospitals
+                .map((dh) => dh?.hospital?.name)
                 .filter(Boolean) as string[];
         }
         return [];

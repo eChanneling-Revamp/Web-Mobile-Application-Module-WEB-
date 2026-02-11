@@ -21,8 +21,8 @@ export interface Doctor {
     updatedAt: string;
     status: string;
     hospitalIds: string[];
-    doctor_hospitals?: Array<{
-        hospitals: {
+    hospitals?: Array<{
+        hospital: {
             id: string;
             name: string;
             district?: string;
@@ -38,9 +38,7 @@ export interface Doctor {
             name: string;
         };
     }>;
-
 }
-
 
 // Search filters interface
 export interface SearchFilters {
@@ -93,7 +91,7 @@ export const fetchDoctors = createAsyncThunk<
     } catch (error: unknown) {
         const err = error as { response?: { data?: { error?: string } } };
         return rejectWithValue(
-            err.response?.data?.error || "Failed to fetch doctors!"
+            err.response?.data?.error || "Failed to fetch doctors!",
         );
     }
 });
@@ -126,13 +124,13 @@ export const searchDoctors = createAsyncThunk<
 
         const endTime = performance.now();
         console.log(
-            `Search API call took ${((endTime - startTime) / 1000).toFixed(2)} seconds.`
+            `Search API call took ${((endTime - startTime) / 1000).toFixed(2)} seconds.`,
         );
         return response.data;
     } catch (error: unknown) {
         const err = error as { response?: { data?: { error?: string } } };
         return rejectWithValue(
-            err.response?.data?.error || "Failed to search doctors!"
+            err.response?.data?.error || "Failed to search doctors!",
         );
     }
 });

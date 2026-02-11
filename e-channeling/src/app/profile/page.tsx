@@ -5,5 +5,5 @@ export default function ProfilePage() {
   // Redirect to appointments by default
   redirect('/profile/appointments ');
   
-  return null; // This won't be rendered due to redirect
+  return null;
 }
