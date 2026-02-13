@@ -103,15 +103,6 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
     });
 }
 
-// get the appointments by user id
-export async function getBookingsById(id: string) {
-    return prisma.appointment.findMany({
-        where: {
-            bookedById: id,
-        },
-    });
-}
-
 // update the appointment by appoinment id
 export async function updateBooking(id: string, data: any) {
     return await prisma.$transaction(async (tx) => {
