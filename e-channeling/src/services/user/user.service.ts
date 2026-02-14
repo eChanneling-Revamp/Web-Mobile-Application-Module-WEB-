@@ -30,24 +30,29 @@ export async function getUserById(id: string) {
 
 // update user by id
 export async function updateUserById(id: string, data: UpdateUserInput) {
-    const contactNumber = `${data.country_code}${data.phone_number}`;
+    const updatedData: any = { ...data };
 
-    const updatedData = { ...data, contactNumber };
-    delete (updatedData as any).country_code;
-    delete (updatedData as any).phone_number;
-
-    // update nic_number key as a nicNumber and passport_number as passportNumber
-    if ((updatedData as any).nic_number !== undefined) {
-        (updatedData as any).nicNumber = (updatedData as any).nic_number;
-        delete (updatedData as any).nic_number;
+    // Handle contact number: combine country_code and phone_number if provided
+    if (data.country_code && data.phone_number) {
+        updatedData.contactNumber = `${data.country_code}${data.phone_number}`;
     }
 
-    if ((updatedData as any).passport_number !== undefined) {
-        (updatedData as any).passportNumber = (
-            updatedData as any
-        ).passport_number;
-        delete (updatedData as any).passport_number;
+    delete updatedData.country_code;
+    delete updatedData.phone_number;
+
+    // Handle both camelCase and snake_case for nicNumber
+    if (updatedData.nic_number !== undefined) {
+        updatedData.nicNumber = updatedData.nic_number;
+        delete updatedData.nic_number;
     }
+    // If nicNumber is already provided (camelCase), keep it as is
+
+    // Handle both camelCase and snake_case for passportNumber
+    if (updatedData.passport_number !== undefined) {
+        updatedData.passportNumber = updatedData.passport_number;
+        delete updatedData.passport_number;
+    }
+    // If passportNumber is already provided (camelCase), keep it as is
 
     const updateUser = prisma.user.update({
         where: { id },

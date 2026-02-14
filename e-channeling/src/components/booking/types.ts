@@ -20,37 +20,37 @@ export interface Doctor {
 }
 
 export interface Session {
-  id: string;
-  doctorId: string;
-  nurseId: string;
-  capacity: number;
-  location: string;
-  hospitalId: string;
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled'; 
-  createdAt: string;     
-  scheduledAt: string;  
-  startTime: string;    
-  endTime: string;      
-  currentRunningNumber: string; 
+    id: string;
+    doctorId: string;
+    nurseId: string;
+    capacity: number;
+    location: string;
+    hospitalId: string;
+    status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+    createdAt: string;
+    scheduledAt: string;
+    startTime: string;
+    endTime: string;
+    currentRunningNumber: string;
 }
 
 export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: "PATIENT"
-  companyName: string | null;
-  contactNumber: string;
-  isActive: boolean;
-  nicNumber: string;
-  passportNumber: string | null;
-  nationality: "Local" | "Foreign";
-  userType: "individual" | "corporate";
-  title: "Mr" | "Mrs" | "Ms" | "Dr";
-  packageId: string;
-  employeeId: string | null;
-  age: number;
-  gender: "male" | "female" | "other";
+    id: string;
+    email: string;
+    name: string;
+    role: "PATIENT"
+    companyName: string | null;
+    contactNumber: string;
+    isActive: boolean;
+    nicNumber: string;
+    passportNumber: string | null;
+    nationality: "Local" | "Foreign";
+    userType: "individual" | "corporate";
+    title: "Mr" | "Mrs" | "Ms" | "Dr";
+    packageId: string;
+    employeeId: string | null;
+    age: number;
+    gender: "male" | "female" | "other";
 }
 
 export interface PatientDetails {
@@ -120,18 +120,18 @@ export interface BookingState {
     selectedSessionStartTime: string | null;
 
     // fetchDoctorById
-    fetchDoctorByIdLoading : boolean
+    fetchDoctorByIdLoading: boolean
     fetchDoctorByIdError: string | null
-    doctorProfile : Doctor | null
+    doctorProfile: Doctor | null
 
     // sessionsByDoctorId
-    sessionsByDoctorIdLoading : boolean
-    sessionsByDoctorIdError : string | null
+    sessionsByDoctorIdLoading: boolean
+    sessionsByDoctorIdError: string | null
     doctorSessions: Session | null
 
     //fetchUserDetails
-    fetchUserDetailsdLoading : boolean
-    fetchUserDetailsIdError : string | null
+    fetchUserDetailsdLoading: boolean
+    fetchUserDetailsIdError: string | null
     user: User | null
 
     // Step 2 data
@@ -140,7 +140,7 @@ export interface BookingState {
     // Step 3 data - Updated to match backend schema
     patientDetails: {
         fullName: string;
-        phone: string;  
+        phone: string;
         email: string;
         nic: string;
         age: number;
@@ -148,7 +148,7 @@ export interface BookingState {
         disease: string; // Optional notes
     };
 
-    isCreateBookingSuccess:boolean
+    isCreateBookingSuccess: boolean
     createBookingLoading: boolean
     createBookingError: string | null
 
@@ -177,20 +177,20 @@ export interface CreateBookingRequest {
 }
 
 export interface CreateBookingResponse {
-        appointmentId: string;
-        appointmentNumber: string;
-        sessionId: string;
-        bookedByUserId: string;
-        patientName: string;
-        patientEmail: string;
-        patientPhone: string;
-        patientNIC: string;
-        patientAge: number;
-        patientGender: Gender;
-        status: AppointmentStatus;
-        consultationFee: number;
-        paymentStatus: PaymentStatus;
-        queuePosition: number;
+    appointmentId: string;
+    appointmentNumber: string;
+    sessionId: string;
+    bookedByUserId: string;
+    patientName: string;
+    patientEmail: string;
+    patientPhone: string;
+    patientNIC: string;
+    patientAge: number;
+    patientGender: Gender;
+    status: AppointmentStatus;
+    consultationFee: number;
+    paymentStatus: PaymentStatus;
+    queuePosition: number;
 }
 
 export interface PaymentState {

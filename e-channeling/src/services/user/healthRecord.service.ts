@@ -10,6 +10,7 @@ export async function getHealthRecordsById(id: string) {
         },
         select: {
             appointmentNumber: true,
+            patientName: true,
             session: {
                 select: {
                     doctors: {
@@ -19,6 +20,7 @@ export async function getHealthRecordsById(id: string) {
                         }
                     },
                     scheduledAt: true,
+                    startTime: true,
 
                 }
             },

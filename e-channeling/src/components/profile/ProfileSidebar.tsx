@@ -80,8 +80,8 @@ export default function ProfileSidebar() {
                         <div className="inline-block">
                             <span
                                 className={`px-3 py-1 rounded-full text-xs font-medium ${user?.packageId === "PREMIUM MEMBER"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-gray-100 text-gray-800"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-gray-100 text-gray-800"
                                     }`}
                             >
                                 {user?.packageId === "PREMIUM MEMBER"

@@ -213,3 +213,45 @@ export async function updatePaymentStatus(id: string) {
         return updatedBooking;
     });
 }
+
+// cancel appointment by appointment id
+export async function cancelAppointment(appointmentId: string) {
+    return await prisma.$transaction(async (tx) => {
+        // First, verify the appointment exists
+        const appointment = await tx.appointment.findUnique({
+            where: {
+                id: appointmentId,
+            },
+        });
+
+        if (!appointment) {
+            throw new Error("Appointment not found");
+        }
+
+        // Check if appointment is already cancelled
+        if (appointment.status === "CANCELLED") {
+            throw new Error("Appointment is already cancelled");
+        }
+
+        // Only allow cancellation of CONFIRMED or PENDING appointments
+        if (!["CONFIRMED", "PENDING"].includes(appointment.status)) {
+            throw new Error(
+                `Cannot cancel appointment with status: ${appointment.status}`
+            );
+        }
+
+        // Update the appointment to cancelled status
+        const cancelledAppointment = await tx.appointment.update({
+            where: {
+                id: appointmentId,
+            },
+            data: {
+                status: "CANCELLED",
+                cancellationDate: new Date(),
+                updatedAt: new Date(),
+            },
+        });
+
+        return cancelledAppointment;
+    });
+}

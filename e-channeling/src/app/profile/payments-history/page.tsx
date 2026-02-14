@@ -31,7 +31,7 @@ const PaymentsHistoryPage: React.FC = () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Payment History</h1>
+        <h1 className="text-2xl  font-bold text-gray-900">Payment History</h1>
         <p className="text-gray-600 mt-1 text-sm md:text-base">View your payment and refund records</p>
       </div>
 

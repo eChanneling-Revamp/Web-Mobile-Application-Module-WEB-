@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { ReactNode, useEffect, useState } from "react";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import { useSelector, useDispatch } from "react-redux";
@@ -10,7 +10,9 @@ import { logout } from "@/store/auth/authSlice";
 export default function ProfileLayout({ children }: { children: ReactNode }) {
     const router = useRouter();
     const dispatch = useDispatch();
-    const { isLoginSuccess, userToken, isHydrated } = useSelector((state: RootState) => state.auth);
+    const { isLoginSuccess, userToken, isHydrated } = useSelector(
+        (state: RootState) => state.auth,
+    );
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
@@ -45,11 +47,11 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[#e7e9f0]">
+            <div className="max-w-[1600px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Sidebar */}
-                    <div className="md:w-1/4">
+                    <div className="md:w-1/4 md:sticky md:top-28 md:self-start">
                         <ProfileSidebar />
                     </div>
 

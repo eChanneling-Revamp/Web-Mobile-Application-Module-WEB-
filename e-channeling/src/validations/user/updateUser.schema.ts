@@ -18,7 +18,7 @@ export const updateUserSchema = z
             .max(50, "First name must be less than 50 characters")
             .regex(
                 /^[a-zA-Z\s'-]+$/,
-                "First name can only contain letters, spaces, hyphens and apostrophes"
+                "First name can only contain letters, spaces, hyphens and apostrophes",
             )
             .optional(),
 
@@ -37,7 +37,7 @@ export const updateUserSchema = z
                 z
                     .string()
                     .regex(/^\d+$/, "Age must be a number")
-                    .transform(Number)
+                    .transform(Number),
             )
             .optional(),
 
@@ -56,11 +56,17 @@ export const updateUserSchema = z
             .toLowerCase()
             .optional(),
 
+        contactNumber: z
+            .string()
+            .min(10, "Contact number must be at least 10 characters")
+            .max(20, "Contact number must be less than 20 characters")
+            .optional(),
+
         country_code: z
             .string()
             .regex(
                 /^\+\d{1,4}$/,
-                "Country code must start with + and contain 1-4 digits"
+                "Country code must start with + and contain 1-4 digits",
             )
             .optional(),
 
@@ -79,7 +85,21 @@ export const updateUserSchema = z
             .nullable()
             .or(z.literal("")),
 
+        nicNumber: z
+            .string()
+            .regex(nicRegex, "Invalid NIC format")
+            .optional()
+            .nullable()
+            .or(z.literal("")),
+
         passport_number: z
+            .string()
+            .regex(passportRegex, "Invalid passport format")
+            .optional()
+            .nullable()
+            .or(z.literal("")),
+
+        passportNumber: z
             .string()
             .regex(passportRegex, "Invalid passport format")
             .optional()
@@ -96,9 +116,11 @@ export const updateUserSchema = z
     })
     .refine(
         (data) => {
-            // If passport_number is provided, nationality should also be provided
-            // If nic_number is provided, that's fine on its own
-            if (data.passport_number && !data.nationality) {
+            // If passport_number or passportNumber is provided, nationality should also be provided
+            // If nic_number or nicNumber is provided, that's fine on its own
+            const hasPassport =
+                data.passport_number || (data as any).passportNumber;
+            if (hasPassport && !data.nationality) {
                 return false;
             }
             return true;
@@ -106,14 +128,18 @@ export const updateUserSchema = z
         {
             message: "Nationality is required when passport number is provided",
             path: ["nationality"],
-        }
+        },
     )
     .refine(
         (data) => {
             // Either NIC number OR (nationality AND passport number) must be provided if any identification is being updated
-            const hasNic = data.nic_number && data.nic_number !== "";
+            const hasNic =
+                (data.nic_number && data.nic_number !== "") ||
+                ((data as any).nicNumber && (data as any).nicNumber !== "");
             const hasPassport =
-                data.passport_number && data.passport_number !== "";
+                (data.passport_number && data.passport_number !== "") ||
+                ((data as any).passportNumber &&
+                    (data as any).passportNumber !== "");
             const hasNationality = data.nationality && data.nationality !== "";
 
             // If no identification fields are being updated, skip validation
@@ -128,7 +154,7 @@ export const updateUserSchema = z
             message:
                 "Either NIC number OR both nationality and passport number are required",
             path: ["nic_number"],
-        }
+        },
     );
 
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;

@@ -132,7 +132,7 @@ const Navbar = () => {
                             <Link
                                 href="/profile"
                                 className={` hover:text-blue-600 font-medium transition-colors
-                            ${isActive == "/profile" ? "text-blue-600 " : "text-gray-700 hover:text-blue-600"}`}
+                            ${isActive.startsWith("/profile") ? "text-blue-600 " : "text-gray-700 hover:text-blue-600"}`}
                             >
                                 My Profile
                             </Link>
@@ -281,7 +281,7 @@ const Navbar = () => {
                                 <Link
                                     href="/profile"
                                     className={` hover:text-blue-600 font-medium transition-colors py-3 px-4 rounded-lg
-                                    ${isActive == "/profile" ? "text-blue-600 " : "text-gray-700 hover:text-blue-600"}`}
+                                    ${isActive.startsWith("/profile") ? "text-blue-600 " : "text-gray-700 hover:text-blue-600"}`}
                                     onClick={handleLinkClick}
                                 >
                                     My Profile

@@ -61,3 +61,64 @@ export async function PATCH(
         );
     }
 }
+
+// cancel appointment by appointment number
+export async function DELETE(
+    request: Request,
+    { params }: { params: Promise<{ appointmentNumber: string }> }
+) {
+    try {
+        const { appointmentNumber } = await params;
+
+        // rate limiting
+        const forwarded = request.headers.get("x-forwarded-for");
+        const ip = forwarded ? forwarded.split(",")[0] : "unknown";
+
+        const isAllowed = await rateLimit(`cancelBooking:${ip}`, 5);
+        if (!isAllowed) {
+            return NextResponse.json(
+                { error: "Too many cancellation attempts. Please try again later." },
+                { status: 429 }
+            );
+        }
+
+        if (!appointmentNumber) {
+            return NextResponse.json(
+                { success: false, message: "Appointment number is required" },
+                { status: 400 }
+            );
+        }
+
+        // First get the appointment to find its ID
+        const appointment = await updateBooking(appointmentNumber, {});
+
+        if (!appointment) {
+            return NextResponse.json(
+                { success: false, message: "Appointment not found" },
+                { status: 404 }
+            );
+        }
+
+        // Import and call cancel function
+        const { cancelAppointment } = await import("@/services/booking/booking.service");
+        const cancelledAppointment = await cancelAppointment(appointment.id);
+
+        return NextResponse.json({
+            success: true,
+            message: "Appointment cancelled successfully",
+            data: {
+                status: cancelledAppointment.status,
+                cancellationDate: cancelledAppointment.cancellationDate,
+            },
+        });
+    } catch (error: any) {
+        console.log(error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: error.message || "Internal server error"
+            },
+            { status: 500 }
+        );
+    }
+}

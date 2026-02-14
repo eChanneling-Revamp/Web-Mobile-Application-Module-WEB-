@@ -6,35 +6,46 @@ export async function getBookingsById(id: string) {
         where: {
             bookedById: id,
         },
+        select: {
+            id: true,
+            appointmentNumber: true,
+            patientName: true,
+            patientEmail: true,
+            patientPhone: true,
+            patientGender: true,
+            patientAge: true,
+            session: {
+                select: {
+                    scheduledAt: true,
+                    startTime: true,
+                    endTime: true,
+                    doctors: {
+                        select: {
+                            name: true,
+                            specialization: true,
+                            hospitals: {
+                                select: {
+                                    hospital: {
+                                        select: {
+                                            name: true,
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            },
+            status: true,
+            consultationFee: true,
+            totalAmount: true,
+            paymentStatus: true,
+            queuePosition: true,
+            notes: true,
+            medicalReportUrl: true,
+            allergies: true,
+        }
     });
 }
 
-// cancel the appointment by appointment id
-export async function cancelBooking(id: string) {
-    return await prisma.$transaction(async (tx) => {
-        const appointment = await tx.appointment.findUnique({
-            where: {
-                id: id,
-            },
-        });
-
-        if (!appointment) {
-            throw new Error(`Appointment with ID ${id} not found`);
-        }
-
-        if (appointment.status === "CANCELLED") {
-            throw new Error("Appointment is already cancelled");
-        }
-
-        const updatedBooking = await tx.appointment.update({
-            where: {
-                id: id,
-            },
-            data: {
-                status: "CANCELLED",
-                updatedAt: new Date(),
-            },
-        });
-        return updatedBooking;
-    });
-}

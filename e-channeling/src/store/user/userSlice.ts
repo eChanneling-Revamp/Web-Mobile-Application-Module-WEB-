@@ -6,18 +6,18 @@ interface User {
     email: string;
     name: string;
     role: string;
-    companyName: string;
-    contactNumber: string;
+    companyName?: string;
+    contactNumber?: string;
     isActive: boolean;
-    nicNumber: string;
-    passportNumber: string;
-    nationality: string;
+    nicNumber?: string;
+    passportNumber?: string;
+    nationality?: string;
     userType: string;
-    title: string;
+    title?: string;
     packageId: string;
-    employeeId: string;
-    age: number;
-    gender: string;
+    employeeId?: string;
+    age?: number;
+    gender?: string;
 }
 
 interface UserState {
@@ -32,19 +32,36 @@ const initialState: UserState = {
     error: null,
 };
 
-export const fetchMe = createAsyncThunk<
+export const fetchMe = createAsyncThunk<User, string, { rejectValue: string }>(
+    "user/fetchMe",
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await api.get(`/user/${userId}`);
+            return response.data.data;
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            return rejectWithValue(
+                err.response?.data?.message || "Failed to fetch user!",
+            );
+        }
+    },
+);
+
+export const updateUser = createAsyncThunk<
     User,
-    string,
+    { userId: string; data: Partial<User> },
     { rejectValue: string }
->("user/fetchMe", async (userId, { rejectWithValue }) => {
+>("user/updateUser", async ({ userId, data }, { rejectWithValue }) => {
     try {
-        const response = await api.get(`/user/${userId}`);
+        const response = await api.patch(`/user/${userId}`, data);
         return response.data.data;
     } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } } };
-        return rejectWithValue(err.response?.data?.message || "Failed to fetch user!");
+        return rejectWithValue(
+            err.response?.data?.message || "Failed to update user!",
+        );
     }
-})
+});
 
 const userSlice = createSlice({
     name: "user",
@@ -67,11 +84,26 @@ const userSlice = createSlice({
                 (state, action: PayloadAction<User>) => {
                     state.loading = false;
                     state.user = action.payload;
-                }
+                },
             )
             .addCase(fetchMe.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Something went wrong";
+            })
+            .addCase(updateUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(
+                updateUser.fulfilled,
+                (state, action: PayloadAction<User>) => {
+                    state.loading = false;
+                    state.user = action.payload;
+                },
+            )
+            .addCase(updateUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to update user";
             });
     },
 });

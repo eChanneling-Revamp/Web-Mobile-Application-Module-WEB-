@@ -1,140 +1,204 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import api from "@/lib/utils/api";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface User {
-    name: string;
-    email: string;
-}
-
-interface AppointmentActions {
-    canJoin: boolean;
-    canCancel: boolean;
-    canReschedule: boolean;
-}
-
-interface Appointment {
+export interface Appointment {
     id: string;
-    doctorName: string;
-    specialty: string;
-    date: string;
-    type: string;
-    time: string;
-    location?: string;
-    status: "upcoming" | "past" | "cancelled";
-    actions: AppointmentActions;
+    appointmentNumber: string;
+    patientName: string;
+    patientEmail: string;
+    patientPhone: string;
+    patientGender: string;
+    patientAge: number;
+    session: {
+        scheduledAt: string;
+        startTime: string;
+        endTime: string;
+        doctors: {
+            name: string;
+            specialization: string;
+            hospitals: {
+                hospital: {
+                    name: string;
+                }
+            }[]
+        }
+    };
+    status: string;
+    consultationFee: string;
+    totalAmount: string;
+    paymentStatus: string;
+    queuePosition: number;
+    notes: string | null;
+    medicalReportUrl: string | null;
+    allergies: string | null;
+}
+
+export interface HealthRecord {
+    appointmentNumber: string;
+    patientName: string;
+    session: {
+        doctors: {
+            name: string;
+            specialization: string;
+        };
+        scheduledAt: string;
+        startTime: string;
+    };
+    prescriptions: {
+        prescriptionNumber: string;
+        htmlContent: string;
+    }[];
+}
+
+interface AppointmentsResponse {
+    success: boolean;
+    message: string;
+    data: Appointment[];
+}
+
+interface HealthRecordsResponse {
+    success: boolean;
+    message: string;
+    data: HealthRecord[];
 }
 
 interface ProfileState {
-    user: User;
     appointments: Appointment[];
-    activeTab: string;
-    activeSection: string;
+    loading: boolean;
+    error: string | null;
+
+    healthRecords: HealthRecord[];
+    healthRecordsLoading: boolean;
+    healthRecordsError: string | null;
+
+    status: string;
+    cancelLoading: boolean;
+    cancelError: string | null;
 }
 
 const initialState: ProfileState = {
-    user: {
-        name: "Priva Jayawardena",
-        email: "priya.j@gmail.com",
-    },
-    appointments: [
-        {
-            id: "1",
-            doctorName: "Dr. Samantha Perera",
-            specialty: "Cardiologist",
-            date: "6/15/2023",
-            type: "In-Person",
-            time: "10:00 AM",
-            location: "National Hospital, Colombo",
-            status: "upcoming",
-            actions: {
-                canJoin: false,
-                canCancel: true,
-                canReschedule: true,
-            },
-        },
-        {
-            id: "2",
-            doctorName: "Dr. Arjun Rajapakse",
-            specialty: "Dermatologist",
-            date: "6/20/2023",
-            type: "Telehealth",
-            time: "2:30 PM",
-            status: "upcoming",
-            actions: {
-                canJoin: true,
-                canCancel: true,
-                canReschedule: true,
-            },
-        },
-        {
-            id: "3",
-            doctorName: "Dr. Kamal Silva",
-            specialty: "General Physician",
-            date: "5/10/2023",
-            type: "In-Person",
-            time: "11:00 AM",
-            location: "City Medical Center",
-            status: "past",
-            actions: {
-                canJoin: false,
-                canCancel: false,
-                canReschedule: false,
-            },
-        },
-        {
-            id: "4",
-            doctorName: "Dr. Nisha Fernando",
-            specialty: "Pediatrician",
-            date: "4/22/2023",
-            type: "Telehealth",
-            time: "3:00 PM",
-            status: "cancelled",
-            actions: {
-                canJoin: false,
-                canCancel: false,
-                canReschedule: false,
-            },
-        },
-    ],
-    activeTab: "upcoming",
-    activeSection: "Appointments",
+    appointments: [],
+    loading: false,
+    error: null,
+
+    healthRecords: [],
+    healthRecordsLoading: false,
+    healthRecordsError: null,
+
+    status: "",
+    cancelLoading: false,
+    cancelError: null,
 };
+
+export const fetchAppointmentsByUserId = createAsyncThunk<
+    AppointmentsResponse,
+    string,
+    { rejectValue: string }
+>("profile/fetchAppointmentsByUserId",
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            const response = await api.get(`/user/${userId}/appointments`);
+            return response.data;
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            return rejectWithValue(err.response?.data?.message || "Failed to fetch appointments!");
+        }
+    });
+
+// Fetch health records by user id
+export const fetchHealthRecordsByUserId = createAsyncThunk<
+    HealthRecordsResponse,
+    string,
+    { rejectValue: string }
+>("profile/fetchHealthRecordsByUserId",
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            const response = await api.get(`/user/${userId}/health-records`);
+            return response.data;
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            return rejectWithValue(err.response?.data?.message || "Failed to fetch health records!");
+        }
+    });
+
+// cancel the appointment by appointment number
+export const cancelBooking = createAsyncThunk<
+    { status: string },
+    string,
+    { rejectValue: string }
+>("profile/cancelBooking",
+    async (appointmentNumber: string, { rejectWithValue }) => {
+        try {
+            const response = await api.delete(`/bookings/${appointmentNumber}`)
+            return response.data;
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            return rejectWithValue(err.response?.data?.message || "Failed to cancel appointment!");
+        }
+    });
 
 const profileSlice = createSlice({
     name: "profile",
     initialState,
     reducers: {
-        setActiveTab: (state, action: PayloadAction<string>) => {
-            state.activeTab = action.payload;
+        clearUser: (state) => {
+            state.appointments = [];
+            state.loading = false;
+            state.error = null;
+            state.healthRecords = [];
+            state.healthRecordsLoading = false;
+            state.healthRecordsError = null;
         },
-        setActiveSection: (state, action: PayloadAction<string>) => {
-            state.activeSection = action.payload;
-        },
-        cancelAppointment: (state, action: PayloadAction<string>) => {
-            const appointment = state.appointments.find(
-                (apt) => apt.id === action.payload
-            );
-            if (appointment) {
-                appointment.status = "cancelled";
-                appointment.actions.canJoin = false;
-                appointment.actions.canCancel = false;
-                appointment.actions.canReschedule = false;
-            }
-        },
-        updateUser: (state, action: PayloadAction<Partial<User>>) => {
-            state.user = { ...state.user, ...action.payload };
-        },
-        addAppointment: (state, action: PayloadAction<Appointment>) => {
-            state.appointments.push(action.payload);
-        },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchAppointmentsByUserId.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(
+                fetchAppointmentsByUserId.fulfilled,
+                (state, action: PayloadAction<AppointmentsResponse>) => {
+                    state.loading = false;
+                    state.appointments = action.payload.data;
+                }
+            )
+            .addCase(fetchAppointmentsByUserId.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Something went wrong";
+            })
+            .addCase(cancelBooking.pending, (state) => {
+                state.cancelLoading = true;
+                state.cancelError = null;
+            })
+            .addCase(
+                cancelBooking.fulfilled,
+                (state, action: PayloadAction<{ status: string }>) => {
+                    state.cancelLoading = false;
+                    state.status = action.payload.status;
+                }
+            )
+            .addCase(cancelBooking.rejected, (state, action) => {
+                state.cancelLoading = false;
+                state.cancelError = action.payload || "Something went wrong";
+            })
+            .addCase(fetchHealthRecordsByUserId.pending, (state) => {
+                state.healthRecordsLoading = true;
+                state.healthRecordsError = null;
+            })
+            .addCase(
+                fetchHealthRecordsByUserId.fulfilled,
+                (state, action: PayloadAction<HealthRecordsResponse>) => {
+                    state.healthRecordsLoading = false;
+                    state.healthRecords = action.payload.data;
+                }
+            )
+            .addCase(fetchHealthRecordsByUserId.rejected, (state, action) => {
+                state.healthRecordsLoading = false;
+                state.healthRecordsError = action.payload || "Something went wrong";
+            })
     },
 });
 
-export const {
-    setActiveTab,
-    setActiveSection,
-    cancelAppointment,
-    updateUser,
-    addAppointment,
-} = profileSlice.actions;
-
+export const { clearUser } = profileSlice.actions;
 export default profileSlice.reducer;
