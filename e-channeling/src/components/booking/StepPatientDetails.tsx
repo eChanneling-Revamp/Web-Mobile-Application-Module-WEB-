@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import {
+    clearBookingError,
     clearBookingSuccess,
     clearPatientDetails,
     createBooking,
@@ -116,6 +117,8 @@ export const StepPatientDetails: React.FC<StepPatientDetailsProps> = ({
     // Handle previous button click
     const handlePrevious = () => {
         dispatch(clearPatientDetails());
+        dispatch(clearBookingError())
+
         onPrev();
     };
 

@@ -1,11 +1,13 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import {
     sessionsByDoctorId,
     setSelectedHospitalName,
     setSelectedSessionId,
+    resetBooking,
 } from "@/store/booking/bookingSlice";
 
 interface StepTypeAndDateProps {
@@ -18,6 +20,7 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
     onNext,
 }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
 
     // Redux state
     const {
@@ -42,14 +45,18 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
         dispatch(setSelectedSessionId(session.id));
     };
 
-    const handleNext = ()=>{
-        if (!selectedSessionId){
+    const handleNext = () => {
+        if (!selectedSessionId) {
             setError("Please select a session before proceeding to the next step.")
             return
         }
         onNext()
-
     }
+
+    const handleBack = () => {
+        dispatch(resetBooking());
+        router.back();
+    };
 
     // SessionSkeleton
     const SessionSkeleton = () => {
@@ -101,26 +108,23 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                             setAppointmentType("in-person");
                             dispatch(setSelectedSessionId(null));
                         }}
-                        className={`rounded-xl border-2 p-4 text-left transition-all duration-200 ${
-                            appointmentType === "in-person"
+                        className={`rounded-xl border-2 p-4 text-left transition-all duration-200 ${appointmentType === "in-person"
                                 ? "border-green-500 bg-green-50 shadow-md ring-2 ring-green-200"
                                 : "border-gray-300 bg-white hover:border-green-300 hover:shadow-lg"
-                        }`}
+                            }`}
                     >
                         <div className="flex items-start gap-3">
                             <div
-                                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    appointmentType === "in-person"
+                                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${appointmentType === "in-person"
                                         ? "bg-green-100"
                                         : "bg-gray-100"
-                                }`}
+                                    }`}
                             >
                                 <svg
-                                    className={`w-6 h-6 ${
-                                        appointmentType === "in-person"
+                                    className={`w-6 h-6 ${appointmentType === "in-person"
                                             ? "text-green-600"
                                             : "text-gray-600"
-                                    }`}
+                                        }`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -135,20 +139,18 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                             </div>
                             <div className="flex-1">
                                 <h4
-                                    className={`font-semibold text-base mb-0.5 ${
-                                        appointmentType === "in-person"
+                                    className={`font-semibold text-base mb-0.5 ${appointmentType === "in-person"
                                             ? "text-green-800"
                                             : "text-gray-900"
-                                    }`}
+                                        }`}
                                 >
                                     In-Person Visit
                                 </h4>
                                 <p
-                                    className={`text-sm ${
-                                        appointmentType === "in-person"
+                                    className={`text-sm ${appointmentType === "in-person"
                                             ? "text-green-700"
                                             : "text-gray-600"
-                                    }`}
+                                        }`}
                                 >
                                     Visit the doctor at the hospital
                                 </p>
@@ -170,29 +172,27 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                     {/* Video Consultation */}
                     <button
                         type="button"
-                        onClick={() => { setAppointmentType("video-consultation");
+                        onClick={() => {
+                            setAppointmentType("video-consultation");
                             dispatch(setSelectedSessionId(null));
                         }}
-                        className={`rounded-xl border-2 p-4 text-left transition-all duration-200 ${
-                            appointmentType === "video-consultation"
+                        className={`rounded-xl border-2 p-4 text-left transition-all duration-200 ${appointmentType === "video-consultation"
                                 ? "border-green-500 bg-green-50 shadow-md ring-2 ring-green-200"
                                 : "border-gray-300 bg-white hover:border-green-300 hover:shadow-lg"
-                        }`}
+                            }`}
                     >
                         <div className="flex items-start gap-3">
                             <div
-                                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    appointmentType === "video-consultation"
+                                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${appointmentType === "video-consultation"
                                         ? "bg-green-100"
                                         : "bg-gray-100"
-                                }`}
+                                    }`}
                             >
                                 <svg
-                                    className={`w-6 h-6 ${
-                                        appointmentType === "video-consultation"
+                                    className={`w-6 h-6 ${appointmentType === "video-consultation"
                                             ? "text-green-600"
                                             : "text-gray-600"
-                                    }`}
+                                        }`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -207,20 +207,18 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                             </div>
                             <div className="flex-1">
                                 <h4
-                                    className={`font-semibold text-base mb-1 ${
-                                        appointmentType === "video-consultation"
+                                    className={`font-semibold text-base mb-1 ${appointmentType === "video-consultation"
                                             ? "text-green-800"
                                             : "text-gray-900"
-                                    }`}
+                                        }`}
                                 >
                                     Video Consultation
                                 </h4>
                                 <p
-                                    className={`text-sm ${
-                                        appointmentType === "video-consultation"
+                                    className={`text-sm ${appointmentType === "video-consultation"
                                             ? "text-green-700"
                                             : "text-gray-600"
-                                    }`}
+                                        }`}
                                 >
                                     Consult with the doctor online
                                 </p>
@@ -255,8 +253,8 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                         </p>
                     </div>
                 ) : !doctorSessions ||
-                  (Array.isArray(doctorSessions) &&
-                      doctorSessions.length === 0) ? (
+                    (Array.isArray(doctorSessions) &&
+                        doctorSessions.length === 0) ? (
                     <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
                         <svg
                             className="w-16 h-16 mx-auto text-gray-400 mb-3"
@@ -287,62 +285,58 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                                         <button
                                             key={session.id}
                                             type="button"
-                                            onClick={() =>{
+                                            onClick={() => {
                                                 handleSessionSelect(session)
                                                 dispatch(setSelectedHospitalName(session.hospitals.name))
                                             }}
-                                            className={`rounded-xl border-2 border-gray-300 p-3 text-left transition-all duration-200 hover:shadow-lg  ${
-                                                isSelected
+                                            className={`rounded-xl border-2 border-gray-300 p-3 text-left transition-all duration-200 hover:shadow-lg  ${isSelected
                                                     ? "border-green-500 bg-green-50 shadow-md ring-2 ring-green-200"
                                                     : "border-gray-300 bg-white hover:border-green-300"
-                                            }`}
+                                                }`}
                                         >
                                             <div className="space-y-2">
                                                 {/* Hospital - Only show for in-person appointments */}
                                                 {appointmentType ===
                                                     "in-person" && (
-                                                    <div className="flex items-center gap-3">
-                                                        <svg
-                                                            className={`w-5 h-5 flex-shrink-0 ${
-                                                                isSelected
+                                                        <div className="flex items-center gap-3">
+                                                            <svg
+                                                                className={`w-5 h-5 flex-shrink-0 ${isSelected
                                                                     ? "text-green-600"
                                                                     : "text-gray-600"
-                                                            }`}
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                                            />
-                                                        </svg>
-                                                        <span
-                                                            className={`font-semibold ${
-                                                                isSelected
+                                                                    }`}
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                                                />
+                                                            </svg>
+                                                            <span
+                                                                className={`font-semibold ${isSelected
                                                                     ? "text-green-800"
                                                                     : "text-gray-900"
-                                                            }`}
-                                                        >
-                                                            {
-                                                                session
-                                                                    .hospitals
-                                                                    .name
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                )}
+                                                                    }`}
+                                                            >
+                                                                {
+                                                                    session
+                                                                        .hospitals
+                                                                        .name
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    )}
 
                                                 {/* Date */}
                                                 <div className="flex items-center gap-3">
                                                     <svg
-                                                        className={`w-5 h-5 flex-shrink-0 ${
-                                                            isSelected
+                                                        className={`w-5 h-5 flex-shrink-0 ${isSelected
                                                                 ? "text-green-600"
                                                                 : "text-gray-600"
-                                                        }`}
+                                                            }`}
                                                         fill="none"
                                                         stroke="currentColor"
                                                         viewBox="0 0 24 24"
@@ -355,11 +349,10 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                                                         />
                                                     </svg>
                                                     <span
-                                                        className={`text-sm ${
-                                                            isSelected
+                                                        className={`text-sm ${isSelected
                                                                 ? "text-green-700"
                                                                 : "text-gray-700"
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {new Date(
                                                             session.scheduledAt
@@ -377,11 +370,10 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                                                 {/* Time */}
                                                 <div className="flex items-center gap-3">
                                                     <svg
-                                                        className={`w-5 h-5 flex-shrink-0 ${
-                                                            isSelected
+                                                        className={`w-5 h-5 flex-shrink-0 ${isSelected
                                                                 ? "text-green-600"
                                                                 : "text-gray-600"
-                                                        }`}
+                                                            }`}
                                                         fill="none"
                                                         stroke="currentColor"
                                                         viewBox="0 0 24 24"
@@ -394,11 +386,10 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                                                         />
                                                     </svg>
                                                     <span
-                                                        className={`text-sm font-medium ${
-                                                            isSelected
+                                                        className={`text-sm font-medium ${isSelected
                                                                 ? "text-green-700"
                                                                 : "text-gray-700"
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {new Date(
                                                             session.scheduledAt
@@ -448,8 +439,17 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                 <div className="text-red-500 text-sm">{error}</div>
             )}
 
-            {/* Next Button */}
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between pt-5">
+
+                <button
+                    type="button"
+                    onClick={handleBack}
+                    className="px-6 py-2.5 text-gray-600 hover:bg-gray-700 border border-bg-black font-semibold rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                    Back
+                </button>
+
+
                 <button
                     type="button"
                     onClick={handleNext}

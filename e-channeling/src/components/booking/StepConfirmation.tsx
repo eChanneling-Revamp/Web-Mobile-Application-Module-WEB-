@@ -21,6 +21,9 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
     } = useSelector((state: RootState) => state.booking);
 
     const { updateAppointment } = useSelector((state: RootState) => state.payment);
+    const { confirmationData } = useSelector((state: RootState) => state.booking);
+
+    const appointment = updateAppointment ?? confirmationData;
 
     // Format date for display
     const formatDate = (dateStr: string) => {
@@ -44,21 +47,21 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
 
     // Download receipt as PDF
     const downloadReceipt = () => {
-        if (!updateAppointment) return;
+        if (!appointment) return;
 
         generateAppointmentReceipt({
-            appointmentNumber: updateAppointment.appointmentNumber,
-            appointmentId: updateAppointment.appointmentId,
-            hospitalName: updateAppointment.session.hospitals.name,
-            queuePosition: updateAppointment.queuePosition,
-            patientName: updateAppointment.patientName,
-            patientNIC: updateAppointment.patientNIC,
-            doctorName: updateAppointment.session.doctors.name,
-            sessionDate: updateAppointment.session.scheduledAt,
-            sessionTime: updateAppointment.session.startTime,
-            consultationFee: updateAppointment.consultationFee,
+            appointmentNumber: appointment.appointmentNumber,
+            appointmentId: appointment.id,
+            hospitalName: appointment.session.hospitals.name,
+            queuePosition: appointment.queuePosition,
+            patientName: appointment.patientName,
+            patientNIC: appointment.patientNIC,
+            doctorName: appointment.session.doctors.name,
+            sessionDate: appointment.session.scheduledAt,
+            sessionTime: appointment.session.startTime,
+            consultationFee: appointment.consultationFee,
             platformFee: 200,
-            paymentStatus: updateAppointment.paymentStatus,
+            paymentStatus: appointment.paymentStatus,
         });
     };
 
@@ -96,7 +99,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
     }
 
     // No confirmation data
-    if (!updateAppointment) {
+    if (!appointment) {
         return (
             <div className="w-full flex items-center justify-center py-8">
                 <div className="text-center">
@@ -139,7 +142,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Appointment Number:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {updateAppointment.appointmentNumber}
+                                {appointment.appointmentNumber}
                             </span>
                         </div>
 
@@ -149,7 +152,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Hospital:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {updateAppointment.session.hospitals.name}
+                                {appointment.session.hospitals.name}
                             </span>
                         </div>
 
@@ -159,7 +162,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Queue Position:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                #{updateAppointment.queuePosition}
+                                #{appointment.queuePosition}
                             </span>
                         </div>
 
@@ -169,7 +172,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Patient Name:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {updateAppointment.patientName}
+                                {appointment.patientName}
                             </span>
                         </div>
 
@@ -179,7 +182,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Patient NIC:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {updateAppointment.patientNIC}
+                                {appointment.patientNIC}
                             </span>
                         </div>
 
@@ -189,7 +192,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Doctor Name:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {updateAppointment.session.doctors.name}
+                                {appointment.session.doctors.name}
                             </span>
                         </div>
 
@@ -199,7 +202,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Date:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {formatDate(updateAppointment.session.scheduledAt)}
+                                {formatDate(appointment.session.scheduledAt)}
                             </span>
                         </div>
 
@@ -209,7 +212,7 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                                 Time:
                             </span>
                             <span className="text-gray-700 ml-2">
-                                {formatTime(updateAppointment.session.startTime)}
+                                {formatTime(appointment.session.startTime)}
                             </span>
                         </div>
 
@@ -220,16 +223,16 @@ export const StepConfirmation: React.FC<StepConfirmationProps> = ({
                             </span>
                             <span className="text-gray-700 ml-2">
                                 <span
-                                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${updateAppointment.paymentStatus ===
+                                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${appointment.paymentStatus ===
                                         "COMPLETED"
                                         ? "bg-green-100 text-green-800"
-                                        : updateAppointment.paymentStatus ===
+                                        : appointment.paymentStatus ===
                                             "PENDING"
                                             ? "bg-yellow-100 text-yellow-800"
                                             : "bg-red-100 text-red-800"
                                         }`}
                                 >
-                                    {updateAppointment.paymentStatus}
+                                    {appointment.paymentStatus}
                                 </span>
                             </span>
                         </div>

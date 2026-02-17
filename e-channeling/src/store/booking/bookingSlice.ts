@@ -68,6 +68,10 @@ const initialState: BookingState = {
     // Errors
     bookingError: null,
 
+    // send confirmation email
+    sendConfirmationEmailLoading: false,
+    sendConfirmationEmailError: null,
+    sendConfirmationEmailSuccess: false,
 };
 
 // Fetch doctor details by ID
@@ -82,7 +86,7 @@ export const fetchDoctorById = createAsyncThunk<
     } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } } };
         return rejectWithValue(
-            err.response?.data?.message || "Failed to fetch doctor details"
+            err.response?.data?.message || "Failed to fetch doctor details",
         );
     }
 });
@@ -99,12 +103,10 @@ export const sessionsByDoctorId = createAsyncThunk<
     } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } } };
         return rejectWithValue(
-            err.response?.data?.message || "Failed to fetch doctor sessions"
+            err.response?.data?.message || "Failed to fetch doctor sessions",
         );
     }
 });
-
-
 
 // // Search sessions - INTEGRATED WITH BACKEND
 // // Uses backend GET /api/search with filters
@@ -139,6 +141,30 @@ export const sessionsByDoctorId = createAsyncThunk<
 //         );
 //     }
 // });
+
+// send confirmation email
+export const sendConfirmationEmail = createAsyncThunk<
+    { success: boolean; message: string },
+    CreateBookingResponse,
+    { rejectValue: string }
+>(
+    "booking/sendConfirmationEmail",
+    async (confirmationData, { rejectWithValue }) => {
+        try {
+            const response = await api.post(
+                "/send-confirmation",
+                confirmationData,
+            );
+            return response.data;
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            return rejectWithValue(
+                err.response?.data?.message ||
+                    "Failed to send confirmation email",
+            );
+        }
+    },
+);
 
 // Create booking - INTEGRATED WITH BACKEND
 export const createBooking = createAsyncThunk<
@@ -185,14 +211,11 @@ export const createBooking = createAsyncThunk<
             return response.data.data;
         } catch (error: any) {
             return rejectWithValue(
-                error.response?.data?.message ||
-                "Failed to create booking"
+                error.response?.data?.message || "Failed to create booking",
             );
         }
-    }
+    },
 );
-
-
 
 // ==================== SLICE ====================
 
@@ -225,7 +248,7 @@ const bookingSlice = createSlice({
                 hospitalName: string;
                 date: string;
                 startTime: string;
-            }>
+            }>,
         ) => {
             state.selectedSessionId = action.payload.sessionId;
             state.selectedHospitalId = action.payload.hospitalId;
@@ -237,7 +260,7 @@ const bookingSlice = createSlice({
         // Step 2 actions
         setForWhom: (
             state,
-            action: PayloadAction<"myself" | "someone_else">
+            action: PayloadAction<"myself" | "someone_else">,
         ) => {
             state.forWhom = action.payload;
         },
@@ -245,7 +268,7 @@ const bookingSlice = createSlice({
         // Step 3 actions
         setPatientDetails: (
             state,
-            action: PayloadAction<Partial<BookingState["patientDetails"]>>
+            action: PayloadAction<Partial<BookingState["patientDetails"]>>,
         ) => {
             state.patientDetails = {
                 ...state.patientDetails,
@@ -256,10 +279,18 @@ const bookingSlice = createSlice({
         // Clear errors
         clearBookingError: (state) => {
             state.bookingError = null;
+            state.createBookingError = null;
         },
         // Clear booking success flag
         clearBookingSuccess: (state) => {
             state.isCreateBookingSuccess = false;
+        },
+
+        // Clear send confirmation email states
+        clearSendConfirmationEmail: (state) => {
+            state.sendConfirmationEmailLoading = false;
+            state.sendConfirmationEmailError = null;
+            state.sendConfirmationEmailSuccess = false;
         },
 
         // Clear patient details
@@ -314,7 +345,6 @@ const bookingSlice = createSlice({
                     action.payload || "Failed to fetch doctor";
             })
 
-
             // Search sessions
 
             // .addCase(searchSessions.pending, (state) => {
@@ -346,6 +376,21 @@ const bookingSlice = createSlice({
                 state.createBookingError =
                     action.payload || "Failed to create booking";
             })
+
+            // send confirmation email
+            .addCase(sendConfirmationEmail.pending, (state) => {
+                state.sendConfirmationEmailLoading = true;
+                state.sendConfirmationEmailError = null;
+            })
+            .addCase(sendConfirmationEmail.fulfilled, (state, action) => {
+                state.sendConfirmationEmailLoading = false;
+                state.sendConfirmationEmailSuccess = action.payload.success;
+            })
+            .addCase(sendConfirmationEmail.rejected, (state, action) => {
+                state.sendConfirmationEmailLoading = false;
+                state.sendConfirmationEmailError =
+                    action.payload || "Failed to send confirmation email";
+            });
     },
 });
 
@@ -360,6 +405,7 @@ export const {
     setPatientDetails,
     clearBookingError,
     clearBookingSuccess,
+    clearSendConfirmationEmail,
     resetBooking,
     clearPatientDetails,
 } = bookingSlice.actions;

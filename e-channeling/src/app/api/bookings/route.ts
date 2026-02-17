@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         try {
             validatedData = bookingSchema.parse(body);
         } catch (error) {
-            console.log("validation error , ",error)
+            console.log("validation error , ", error)
             if (error instanceof ZodError) {
                 // Return the first validation error message
                 const firstError = error.issues[0];
@@ -45,20 +45,35 @@ export async function POST(request: Request) {
         const appointment = await createBooking(validatedData);
 
         const sanitizedAppointment = {
-            appointmentId: appointment.id,
+            id: appointment.id,
             appointmentNumber: appointment.appointmentNumber,
+            bookedById: appointment.bookedById,
             sessionId: appointment.sessionId,
-            bookedByUserId: appointment.bookedById,
+            isNewPatient: appointment.isNewPatient,
             patientName: appointment.patientName,
             patientEmail: appointment.patientEmail,
             patientPhone: appointment.patientPhone,
             patientNIC: appointment.patientNIC,
-            patientAge: appointment.patientAge,
             patientGender: appointment.patientGender,
+            patientAge: appointment.patientAge,
+            medicalReportUrl: appointment.medicalReportUrl,
             status: appointment.status,
             consultationFee: appointment.consultationFee,
+            totalAmount: appointment.totalAmount,
             paymentStatus: appointment.paymentStatus,
             queuePosition: appointment.queuePosition,
+            createdAt: appointment.createdAt,
+            updatedAt: appointment.updatedAt,
+            session: {
+                scheduledAt: appointment.session.scheduledAt,
+                startTime: appointment.session.startTime,
+                doctors: {
+                    name: appointment.session.doctors.name,
+                },
+                hospitals: {
+                    name: appointment.session.hospitals.name,
+                },
+            },
         };
 
         return NextResponse.json(

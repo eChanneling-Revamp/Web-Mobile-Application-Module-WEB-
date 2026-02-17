@@ -199,7 +199,7 @@ const RunningNumberPage = () => {
               Appointments for {phoneNumber}
             </h3>
             <p className="text-gray-600">
-              No ongoing sessions found for this number.
+              No ongoing Appointments found for this number.
             </p>
           </div>
         )}

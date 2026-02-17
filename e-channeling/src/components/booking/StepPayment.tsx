@@ -4,8 +4,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import {
     createBooking,
+    sendConfirmationEmail,
+    clearSendConfirmationEmail,
 } from "@/store/booking/bookingSlice";
-import { clearPaymentDetails, clearPaymentError, clearPaymentSuccess, processPayment, setPaymentDetails } from "@/store/payment/paymentSlice";
+import {
+    clearPaymentDetails,
+    clearPaymentError,
+    clearPaymentSuccess,
+    processPayment,
+    setPaymentDetails,
+} from "@/store/payment/paymentSlice";
 
 interface StepPaymentProps {
     doctorFee: string;
@@ -27,9 +35,17 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
         isCreatingBooking,
         bookingError,
         confirmationData,
+        sendConfirmationEmailError,
+        sendConfirmationEmailLoading,
+        sendConfirmationEmailSuccess,
     } = useSelector((state: RootState) => state.booking);
 
-    const { paymentDetails, isProcessingPayment, paymentError, isPaymentSuccess } = useSelector((state: RootState) => state.payment);
+    const {
+        paymentDetails,
+        isProcessingPayment,
+        paymentError,
+        isPaymentSuccess,
+    } = useSelector((state: RootState) => state.payment);
 
     // Track touched fields for validation
     const [touched, setTouched] = useState({
@@ -48,7 +64,7 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
     // Handle input changes
     const handleChange = (
         field: keyof typeof paymentDetails,
-        value: string
+        value: string,
     ) => {
         dispatch(setPaymentDetails({ [field]: value }));
     };
@@ -137,7 +153,6 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
                 throw new Error("No booking confirmation data available");
             }
 
-
             await dispatch(
                 processPayment({
                     appointmentNumber: confirmationData.appointmentNumber,
@@ -146,10 +161,8 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
                     cardHolderName: paymentDetails.cardHolderName,
                     expiryDate: paymentDetails.expiryDate,
                     cvv: paymentDetails.cvv,
-                })
+                }),
             ).unwrap();
-
-            
         } catch (error: any) {
             // Error is handled in Redux state
             console.error("Payment processing error:", error);
@@ -164,6 +177,28 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
             onNext();
         }
     }, [isPaymentSuccess]);
+
+    // Handle Pay Later - send confirmation email and navigate on success
+    useEffect(() => {
+        if (sendConfirmationEmailSuccess) {
+            onNext();
+        }
+    }, [sendConfirmationEmailSuccess]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            dispatch(clearSendConfirmationEmail());
+        };
+    }, []);
+
+    const handlePayLater = async () => {
+        if (!confirmationData) {
+            return;
+        }
+        // Dispatch the sendConfirmationEmail action
+        dispatch(sendConfirmationEmail(confirmationData));
+    };
 
     const inputClass =
         "w-full rounded-xl border-2 border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200";
@@ -189,6 +224,13 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
                     {paymentError && (
                         <div className="rounded-xl bg-red-50 border-2 border-red-200 p-4 text-red-800">
                             {paymentError}
+                        </div>
+                    )}
+
+                    {/* Show confirmation email error */}
+                    {sendConfirmationEmailError && (
+                        <div className="rounded-xl bg-red-50 border-2 border-red-200 p-4 text-red-800">
+                            {sendConfirmationEmailError}
                         </div>
                     )}
 
@@ -268,7 +310,7 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
                                 onChange={(e) => {
                                     const digits = e.target.value.replace(
                                         /\D/g,
-                                        ""
+                                        "",
                                     );
                                     handleChange("cvv", digits);
                                 }}
@@ -337,7 +379,7 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center justify-end pt-8">
+            <div className="flex items-center justify-between pt-8">
                 {/* <button
                     type="button"
                     onClick={onPrev}
@@ -346,6 +388,16 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
                 >
                     ← Previous
                 </button> */}
+
+                {/* Pay Later Button */}
+                <button
+                    type="button"
+                    onClick={handlePayLater}
+                    disabled={sendConfirmationEmailLoading || !confirmationData}
+                    className="px-6 py-2.5 bg-blue-600 cursor-pointer hover:bg-blue-700 text-white font-semibold rounded-full transition ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {sendConfirmationEmailLoading ? "Sending..." : "Pay Later"}
+                </button>
 
                 <button
                     type="submit"
@@ -357,8 +409,8 @@ export const StepPayment: React.FC<StepPaymentProps> = ({
                     {isCreatingBooking
                         ? "Creating Booking..."
                         : isProcessingPayment
-                            ? "Processing Payment..."
-                            : "Confirm and Pay →"}
+                          ? "Processing Payment..."
+                          : "Pay Now →"}
                 </button>
             </div>
         </form>

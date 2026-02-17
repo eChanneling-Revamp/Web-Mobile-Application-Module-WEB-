@@ -161,6 +161,11 @@ export interface BookingState {
 
     // Error states
     bookingError: string | null;
+
+    // send confirmation email
+    sendConfirmationEmailLoading: boolean;
+    sendConfirmationEmailError: string | null;
+    sendConfirmationEmailSuccess: boolean;
 }
 
 // API Request/Response types matching backend
@@ -177,10 +182,11 @@ export interface CreateBookingRequest {
 }
 
 export interface CreateBookingResponse {
-    appointmentId: string;
+    id: string;
     appointmentNumber: string;
     sessionId: string;
-    bookedByUserId: string;
+    bookedByUserId: string | null;
+    isNewPatient: boolean;
     patientName: string;
     patientEmail: string;
     patientPhone: string;
@@ -189,8 +195,22 @@ export interface CreateBookingResponse {
     patientGender: Gender;
     status: AppointmentStatus;
     consultationFee: number;
+    totalAmount: number;
     paymentStatus: PaymentStatus;
     queuePosition: number;
+    medicalReportUrl: string | null;
+    createdAt: string;
+    updatedAt: string;
+    session: {
+        scheduledAt: string;
+        startTime: string;
+        doctors: {
+            name: string;
+        };
+        hospitals: {
+            name: string;
+        };
+    };
 }
 
 export interface PaymentState {

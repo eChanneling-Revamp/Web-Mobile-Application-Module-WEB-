@@ -9,15 +9,9 @@ import { motion } from "framer-motion";
 
 const QuickAccess = () => {
     const items = [
+        
         {
             id: 1,
-            title: "Doctor App",
-            icon: <FaUserDoctor className="w-11 h-11 text-gray-500" />,
-            href: "/doctor-app",
-            isNew: true,
-        },
-        {
-            id: 2,
             title: "Running Number",
             icon: (
                 <Image
@@ -31,7 +25,7 @@ const QuickAccess = () => {
             isNew: false,
         },
         {
-            id: 3,
+            id: 2,
             title: "Booking Doctor",
             icon: (
                 <ClipboardClock className="w-11 h-11 text-gray-500 border-gray-600" />
@@ -40,7 +34,7 @@ const QuickAccess = () => {
             isNew: false,
         },
         {
-            id: 4,
+            id: 3,
             title: "Help & Support",
             icon: (
                 <HeartHandshake className="w-11 h-11 text-gray-500 border-gray-600" />
@@ -52,7 +46,7 @@ const QuickAccess = () => {
 
     return (
         <section className="py-12 sm:pb-16 lg:pb-20 pt-25 px-4 sm:px-6 lg:px-8 bg-white mb-12 sm:mb-16">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -65,7 +59,7 @@ const QuickAccess = () => {
                     </h2>
                 </motion.div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3  gap-4 sm:gap-6">
                     {items.map((item, index) => (
                         <motion.div
                             key={item.id}

@@ -11,7 +11,7 @@ export async function GET(
         const forwarded = request.headers.get("x-forwarded-for");
         const ip = forwarded ? forwarded.split(",")[0] : "unknown";
 
-        const isAllowed = await rateLimit(`getUser:${ip}`, 10);
+        const isAllowed = await rateLimit(`getUser:${ip}`, 20);
         if (!isAllowed) {
             return NextResponse.json(
                 {
@@ -43,12 +43,12 @@ export async function GET(
             record => record.prescriptions.length > 0
         );
 
-        if (recordsWithPrescriptions.length === 0) {
-            return NextResponse.json(
-                { success: false, message: "No prescriptions found" },
-                { status: 404 }
-            );
-        }
+        // if (recordsWithPrescriptions.length === 0) {
+        //     return NextResponse.json(
+        //         { success: false, message: "No prescriptions found" },
+        //         { status: 404 }
+        //     );
+        // }
 
         return NextResponse.json(
             {

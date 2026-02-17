@@ -21,7 +21,7 @@ export async function GET(
         const forwarded = request.headers.get("x-forwarded-for");
         const ip = forwarded ? forwarded.split(",")[0] : "unknown";
 
-        const isAllowed = await rateLimit(`getUser:${ip}`, 10);
+        const isAllowed = await rateLimit(`getUser:${ip}`, 20);
         if (!isAllowed) {
             return NextResponse.json(
                 {

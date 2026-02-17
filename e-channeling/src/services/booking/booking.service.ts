@@ -97,6 +97,44 @@ export async function createBooking(data: Readonly<CreateBookingInput>) {
                 queuePosition: newQueuePosition,
                 updatedAt: new Date(),
             },
+
+            select: {
+                id: true,
+                appointmentNumber: true,
+                bookedById: true,
+                sessionId: true,
+                isNewPatient: true,
+                patientName: true,
+                patientEmail: true,
+                patientPhone: true,
+                patientNIC: true,
+                patientGender: true,
+                patientAge: true,
+                medicalReportUrl: true,
+                status: true,
+                consultationFee: true,
+                totalAmount: true,
+                paymentStatus: true,
+                queuePosition: true,
+                createdAt: true,
+                updatedAt: true,
+                session: {
+                    select: {
+                        scheduledAt: true,
+                        startTime: true,
+                        doctors: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        hospitals: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         return appointment;

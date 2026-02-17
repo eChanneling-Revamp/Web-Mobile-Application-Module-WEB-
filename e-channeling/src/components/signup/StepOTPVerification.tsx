@@ -129,7 +129,7 @@ export const StepOTPVerification = ({ setStep }: StepPackageSelectionProps) => {
                             OTP Verification
                         </p>
                         <p className="text-sm text-gray-600 mt-2">
-                            We have send OTP to your mobile number{" "}
+                            We have send OTP to your Email{" "}
                             {phoneFromState}
                         </p>
                     </div>

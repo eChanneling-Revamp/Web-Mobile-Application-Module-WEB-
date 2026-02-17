@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
-import { fetchAppointmentsByUserId, cancelBooking } from "@/store/profile/profileSlice";
+import {
+    fetchAppointmentsByUserId,
+    cancelBooking,
+} from "@/store/profile/profileSlice";
 import type { Appointment } from "@/store/profile/profileSlice";
 import {
     FileText,
@@ -45,6 +48,7 @@ interface TransformedAppointment {
     notes: string | null;
     medicalReportUrl: string | null;
     allergies: string | null;
+    scheduledAt: Date;
 }
 
 // Helper function to transform API data to UI format
@@ -52,7 +56,9 @@ const transformAppointment = (
     appointment: Appointment,
 ): TransformedAppointment => {
     const doctorName = appointment.session.doctors.name;
-    const patientName = appointment.patientName.charAt(0).toUpperCase() + appointment.patientName.slice(1);
+    const patientName =
+        appointment.patientName.charAt(0).toUpperCase() +
+        appointment.patientName.slice(1);
     const specialization = appointment.session.doctors.specialization;
     const hospitalName =
         appointment.session.doctors.hospitals[0]?.hospital?.name || "N/A";
@@ -69,9 +75,11 @@ const transformAppointment = (
     });
 
     let uiStatus: "upcoming" | "past" | "cancelled";
+    const pastStatuses = ["COMPLETED", "ABSENT", "SERVED"];
+
     if (appointment.status === "CANCELLED") {
         uiStatus = "cancelled";
-    } else if (appointment.status === "COMPLETED") {
+    } else if (pastStatuses.includes(appointment.status)) {
         uiStatus = "past";
     } else {
         uiStatus = "upcoming";
@@ -98,6 +106,7 @@ const transformAppointment = (
         notes: appointment.notes,
         medicalReportUrl: appointment.medicalReportUrl,
         allergies: appointment.allergies,
+        scheduledAt: new Date(appointment.session.scheduledAt),
     };
 };
 
@@ -134,7 +143,7 @@ const AppointmentCard: React.FC<{ appointment: TransformedAppointment }> = ({
 
         try {
             const result = await dispatch(
-                cancelBooking(appointment.appointmentNumber)
+                cancelBooking(appointment.appointmentNumber),
             ).unwrap();
 
             setCancelSuccess(true);
@@ -148,7 +157,9 @@ const AppointmentCard: React.FC<{ appointment: TransformedAppointment }> = ({
                 setCancelSuccess(false);
             }, 2000);
         } catch (error: any) {
-            setCancelError(error || "Failed to cancel appointment. Please try again.");
+            setCancelError(
+                error || "Failed to cancel appointment. Please try again.",
+            );
         } finally {
             setIsCancelling(false);
         }
@@ -359,59 +370,59 @@ const AppointmentCard: React.FC<{ appointment: TransformedAppointment }> = ({
             {(appointment.notes ||
                 appointment.allergies ||
                 appointment.medicalReportUrl) && (
-                    <div className="px-4 py-4 md:px-6 md:py-5 border-t border-gray-200">
-                        <h4 className="text-[11px] md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                            Medical Information
-                        </h4>
-                        <div className="space-y-3">
-                            {appointment.notes && (
-                                <div className="flex items-start gap-2 md:gap-3">
-                                    <ClipboardList className="w-4 h-4 md:w-5 md:h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[11px] md:text-sm text-gray-600 font-medium mb-1">
-                                            Medical Notes
-                                        </p>
-                                        <p className="text-sm md:text-base text-gray-800 break-words">
-                                            {appointment.notes}
-                                        </p>
-                                    </div>
+                <div className="px-4 py-4 md:px-6 md:py-5 border-t border-gray-200">
+                    <h4 className="text-[11px] md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                        Medical Information
+                    </h4>
+                    <div className="space-y-3">
+                        {appointment.notes && (
+                            <div className="flex items-start gap-2 md:gap-3">
+                                <ClipboardList className="w-4 h-4 md:w-5 md:h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] md:text-sm text-gray-600 font-medium mb-1">
+                                        Medical Notes
+                                    </p>
+                                    <p className="text-sm md:text-base text-gray-800 break-words">
+                                        {appointment.notes}
+                                    </p>
                                 </div>
-                            )}
-                            {appointment.allergies && (
-                                <div className="flex items-start gap-2 md:gap-3">
-                                    <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[11px] md:text-sm text-gray-600 font-medium mb-1">
-                                            Allergies
-                                        </p>
-                                        <p className="text-sm md:text-base text-gray-800 break-words">
-                                            {appointment.allergies}
-                                        </p>
-                                    </div>
+                            </div>
+                        )}
+                        {appointment.allergies && (
+                            <div className="flex items-start gap-2 md:gap-3">
+                                <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] md:text-sm text-gray-600 font-medium mb-1">
+                                        Allergies
+                                    </p>
+                                    <p className="text-sm md:text-base text-gray-800 break-words">
+                                        {appointment.allergies}
+                                    </p>
                                 </div>
-                            )}
-                            {appointment.medicalReportUrl && (
-                                <div className="flex items-start gap-2 md:gap-3">
-                                    <FileText className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[11px] md:text-sm text-gray-600 font-medium mb-1">
-                                            Medical Report
-                                        </p>
-                                        <a
-                                            href={appointment.medicalReportUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 md:gap-2 text-sm md:text-base text-blue-600 hover:text-blue-700 font-medium hover:underline active:text-blue-800 touch-manipulation"
-                                        >
-                                            <Download className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
-                                            <span>Download Report</span>
-                                        </a>
-                                    </div>
+                            </div>
+                        )}
+                        {appointment.medicalReportUrl && (
+                            <div className="flex items-start gap-2 md:gap-3">
+                                <FileText className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] md:text-sm text-gray-600 font-medium mb-1">
+                                        Medical Report
+                                    </p>
+                                    <a
+                                        href={appointment.medicalReportUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 md:gap-2 text-sm md:text-base text-blue-600 hover:text-blue-700 font-medium hover:underline active:text-blue-800 touch-manipulation"
+                                    >
+                                        <Download className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                                        <span>Download Report</span>
+                                    </a>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
+            )}
 
             {/* Payment Section */}
             <div className="px-4 py-3 md:px-6 md:py-4 border-t border-gray-200">
@@ -436,13 +447,15 @@ const AppointmentCard: React.FC<{ appointment: TransformedAppointment }> = ({
                         <button
                             onClick={handleCancelClick}
                             disabled={isCancelling}
-                            className={`w-full sm:w-auto px-3 py-1.5 md:px-4 md:py-2 ${isCancelling
-                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                : "bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 hover:text-red-700"
-                                } font-medium text-xs md:text-sm rounded-lg border ${isCancelling
+                            className={`w-full sm:w-auto px-3 py-1.5 md:px-4 md:py-2 ${
+                                isCancelling
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 hover:text-red-700"
+                            } font-medium text-xs md:text-sm rounded-lg border ${
+                                isCancelling
                                     ? "border-gray-200"
                                     : "border-red-200 hover:border-red-300"
-                                } transition-all duration-200 flex items-center justify-center gap-1.5 touch-manipulation`}
+                            } transition-all duration-200 flex items-center justify-center gap-1.5 touch-manipulation`}
                         >
                             <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             <span>
@@ -490,9 +503,20 @@ const AppointmentsPage: React.FC = () => {
     // Transform appointments from API format to UI format
     const transformedAppointments = appointments.map(transformAppointment);
 
-    const filteredAppointments = transformedAppointments.filter(
-        (app) => app.status === activeTab,
-    );
+    const filteredAppointments = transformedAppointments
+        .filter((app) => app.status === activeTab)
+        .sort((a, b) => {
+            const timeA = a.scheduledAt.getTime();
+            const timeB = b.scheduledAt.getTime();
+
+            // For upcoming appointments: sort by scheduledAt ASC (earliest first)
+            if (activeTab === "upcoming") {
+                return timeA - timeB;
+            }
+
+            // For past and cancelled: sort by scheduledAt DESC (most recent first)
+            return timeB - timeA;
+        });
 
     const appointmentCounts = {
         upcoming: transformedAppointments.filter(
@@ -540,10 +564,11 @@ const AppointmentsPage: React.FC = () => {
                             onClick={() => setActiveTab(tab.id)}
                             className={`
                 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                ${activeTab === tab.id
-                                    ? "border-blue-500 text-blue-600"
-                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }
+                ${
+                    activeTab === tab.id
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }
               `}
                         >
                             {tab.label}

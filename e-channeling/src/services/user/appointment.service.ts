@@ -28,14 +28,13 @@ export async function getBookingsById(id: string) {
                                     hospital: {
                                         select: {
                                             name: true,
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
             status: true,
             consultationFee: true,
@@ -45,7 +44,11 @@ export async function getBookingsById(id: string) {
             notes: true,
             medicalReportUrl: true,
             allergies: true,
-        }
+        },
+        orderBy: {
+            session: {
+                scheduledAt: "desc",
+            },
+        },
     });
 }
-
