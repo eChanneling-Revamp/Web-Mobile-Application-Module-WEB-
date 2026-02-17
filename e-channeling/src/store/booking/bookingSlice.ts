@@ -304,7 +304,7 @@ const bookingSlice = createSlice({
                 gender: "",
                 disease: "",
             };
-            state.selectedSessionId = null;
+            //state.selectedSessionId = null;
             state.forWhom = null;
         },
 
