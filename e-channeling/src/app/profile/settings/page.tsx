@@ -5,10 +5,16 @@ import { UserCircle, Key, LogOut, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@/store/auth/authSlice";
 import { AppDispatch } from "@/store";
+import { useState } from "react";
+import { DeleteAccountModal } from "@/components/profile/DeleteAccountModal";
 
 export default function SettingsPage() {
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [deleteSuccess, setDeleteSuccess] = useState(false);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -16,12 +22,43 @@ export default function SettingsPage() {
     };
 
     const handleDeleteAccount = () => {
-        if (
-            confirm(
-                "Are you sure you want to permanently delete your account? This action cannot be undone.",
-            )
-        ) {
-            console.log("Delete account");
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        setIsDeleting(true);
+        setDeleteError(null);
+
+        try {
+            // TODO: Implement actual API call to delete account
+            // await deleteAccountAPI();
+
+            // Simulate API call
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            setDeleteSuccess(true);
+
+            // After successful deletion, logout and redirect
+            setTimeout(() => {
+                dispatch(logout());
+                router.push("/");
+            }, 2000);
+        } catch (error) {
+            setDeleteError(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to delete account. Please try again.",
+            );
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleCloseModal = () => {
+        if (!isDeleting) {
+            setIsDeleteModalOpen(false);
+            setDeleteError(null);
+            setDeleteSuccess(false);
         }
     };
 
@@ -155,7 +192,7 @@ export default function SettingsPage() {
                                 <h3 className="font-semibold text-red-600">
                                     Delete Account
                                 </h3>
-                                <p className="text-sm mt-1 text-red-500">
+                                <p className="text-sm mt-1 text-red-600">
                                     Permanently delete your account
                                 </p>
                             </div>
@@ -178,6 +215,16 @@ export default function SettingsPage() {
                     </button>
                 </div>
             </div>
+
+            {/* Delete Account Modal */}
+            <DeleteAccountModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleCloseModal}
+                onConfirm={handleConfirmDelete}
+                isLoading={isDeleting}
+                error={deleteError}
+                success={deleteSuccess}
+            />
         </div>
     );
 }

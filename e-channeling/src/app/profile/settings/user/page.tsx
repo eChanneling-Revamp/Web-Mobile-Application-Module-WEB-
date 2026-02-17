@@ -150,11 +150,20 @@ export default function UserProfilePage() {
     return (
         <div>
             <div className="mb-6">
+
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            My Profile
-                        </h1>
+                        <div className="flex items-start gap-2">
+                            <button
+                                onClick={() => router.back()}
+                                className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mt-2"
+                            >
+                                <ArrowLeft className="h-5.5 w-5.5" />
+                            </button>
+                            <h1 className="text-2xl font-bold text-gray-900 ">
+                                My Profile
+                            </h1>
+                        </div>
                         <p className="text-gray-600 mt-1">
                             View and manage your personal information
                         </p>
@@ -209,7 +218,7 @@ export default function UserProfilePage() {
             )}
 
             {/* Profile Header Card */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-4 ">
+            <div className="bg-custom-white rounded-lg shadow-sm p-6 mb-4 ">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                     <div className="flex-1 text-center md:text-left ">
                         <h2 className="text-[22px] font-bold text-gray-900 ml-1 mb-2">
@@ -243,21 +252,19 @@ export default function UserProfilePage() {
                         </p>
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-4">
                             <span
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${
-                                    user.packageId === "PREMIUM_MEMBER"
-                                        ? "bg-linear-to-r from-amber-400 to-amber-600 text-white"
-                                        : "bg-gray-200 text-gray-700"
-                                }`}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${user.packageId === "PREMIUM_MEMBER"
+                                    ? "bg-linear-to-r from-amber-400 to-amber-600 text-white"
+                                    : "bg-gray-200 text-gray-700"
+                                    }`}
                             >
                                 <Award className="h-4 w-4" />
                                 {user.packageId.replace("_", " ")}
                             </span>
                             <span
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${
-                                    user.isActive
-                                        ? "bg-green-200 text-green-700"
-                                        : "bg-red-100 text-red-700"
-                                }`}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${user.isActive
+                                    ? "bg-green-200 text-green-700"
+                                    : "bg-red-100 text-red-700"
+                                    }`}
                             >
                                 {user.isActive ? (
                                     <CheckCircle2 className="h-4 w-4" />
@@ -272,7 +279,7 @@ export default function UserProfilePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
-                <div className="bg-white rounded-lg shadow-sm px-6 py-2">
+                <div className="bg-custom-white rounded-lg shadow-sm px-6 py-2">
                     <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
                         <div className="p-2 bg-blue-50 rounded-lg">
                             <User className="h-5 w-5 text-blue-600" />
@@ -369,7 +376,7 @@ export default function UserProfilePage() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm px-6 py-2">
+                <div className="bg-custom-white rounded-lg shadow-sm px-6 py-2">
                     <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
                         <div className="p-2 bg-blue-50 rounded-lg">
                             <Phone className="h-5 w-5 text-blue-600" />
@@ -407,7 +414,7 @@ export default function UserProfilePage() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm px-6 py-1">
+                <div className="bg-custom-white rounded-lg shadow-sm px-6 py-1">
                     <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
                         <div className="p-2 bg-blue-50 rounded-lg">
                             <IdCard className="h-5 w-5 text-blue-600" />
@@ -494,7 +501,7 @@ export default function UserProfilePage() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm px-6 py-1">
+                <div className="bg-custom-white rounded-lg shadow-sm px-6 py-1">
                     <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
                         <div className="p-2 bg-blue-50 rounded-lg">
                             <Briefcase className="h-5 w-5 text-blue-600" />
@@ -527,15 +534,7 @@ export default function UserProfilePage() {
                 </div>
             </div>
 
-            <div className="mt-6">
-                <button
-                    onClick={() => router.back()}
-                    className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span>Back to Settings</span>
-                </button>
-            </div>
+
         </div>
     );
 }

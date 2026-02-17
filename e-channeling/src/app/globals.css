@@ -21,6 +21,7 @@ html {
 
 @theme {
     --color-matte-green: #008486;
+    --color-custom-white: #edf0f5;
 }
 
 /* globals.css */
