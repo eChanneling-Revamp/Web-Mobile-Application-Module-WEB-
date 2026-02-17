@@ -1,19 +1,21 @@
-export interface RunningNumberAppointment {
+export type RunningNumberAppointment = {
   appointmentId: string;
+  appointmentNumber: string | null;
+
+  patientName: string;
   doctorName: string;
   hospitalName: string;
-  sessionDate: string;
-  sessionStartTime: string;
-  currentRunningNumber: number;
-  yourNumber: number;
-  patientName: string;
-}
 
-export interface RunningNumberState {
+  sessionDate: string | null; // YYYY-MM-DD
+  sessionStartTime: string | null; // HH:mm
+
+  currentRunningNumber: number | null;
+  yourNumber: number | null;
+};
+
+export type RunningNumberState = {
   phoneNumber: string;
-  isOtpSent: boolean;
-  isOtpVerified: boolean;
   appointments: RunningNumberAppointment[];
   isLoadingAppointments: boolean;
   error: string | null;
-}
+};
