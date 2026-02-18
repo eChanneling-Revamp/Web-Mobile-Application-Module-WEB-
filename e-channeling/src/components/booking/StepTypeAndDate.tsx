@@ -444,7 +444,7 @@ export const StepTypeAndDate: React.FC<StepTypeAndDateProps> = ({
                 <button
                     type="button"
                     onClick={handleBack}
-                    className="px-6 py-2.5 text-gray-600 hover:bg-gray-700 border border-bg-black font-semibold rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    className="px-6 py-2.5 text-gray-600 hover:bg-gray-700 hover:text-white border border-bg-black font-semibold rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
                     Back
                 </button>
