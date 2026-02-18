@@ -94,7 +94,6 @@ export default function HelpPage() {
 
     return (
         <div className="min-h-screen px-5 sm:px-15 pt-8">
-            {/* Hero Section */}
             <section
                 className="px-4 sm:px-6 lg:px-20 py-10 sm:py-12 bg-gradient-to-r from-blue-500 to-green-500 mx-4 sm:mx-0 rounded-2xl relative overflow-hidden"
                 style={{
@@ -178,7 +177,6 @@ export default function HelpPage() {
                 </div>
             </section>
 
-            {/* Booking Guide Section */}
             <section
                 id="booking-guide"
                 className="py-16 px-4 sm:px-6 lg:px-20 bg-gray-50"
@@ -269,7 +267,6 @@ export default function HelpPage() {
                 </div>
             </section>
 
-            {/* FAQ Section */}
             <section id="faq" className="py-16 px-4 sm:px-6 lg:px-20 bg-white">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-12">
@@ -311,7 +308,6 @@ export default function HelpPage() {
                 </div>
             </section>
 
-            {/* Additional Help Resources */}
             <section className="py-16 px-4 sm:px-6 lg:px-20 bg-gradient-to-r from-blue-50 to-green-50">
                 <div className="max-w-6xl mx-auto">
                     <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-8 text-center">
@@ -375,7 +371,6 @@ export default function HelpPage() {
                 </div>
             </section>
 
-            {/* Contact Support Section */}
             <section
                 id="contact"
                 className="py-16 px-4 sm:px-6 lg:px-20 bg-white"
@@ -436,24 +431,8 @@ export default function HelpPage() {
                                 support@echannelling.com
                             </a>
                         </div>
-
-                        {/* <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl p-8 text-center hover:shadow-lg transition-shadow border border-gray-200">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-green-600 mb-4">
-                                <MessageCircle className="w-8 h-8 text-white" />
-                            </div>
-                            <h3 className="font-semibold text-gray-800 mb-2 text-lg">
-                                Live Chat
-                            </h3>
-                            <p className="text-gray-600 text-sm mb-4">
-                                Chat with us in real-time
-                            </p>
-                            <button className="text-blue-600 font-semibold hover:text-blue-700">
-                                Start Chat →
-                            </button>
-                        </div> */}
                     </div>
 
-                    {/* Emergency Notice */}
                     <div className="mt-12 bg-red-50 border-l-4 border-red-500 rounded-lg p-6">
                         <div className="flex items-start">
                             <div className="flex-shrink-0">
@@ -476,10 +455,10 @@ export default function HelpPage() {
                                     Medical Emergency?
                                 </h3>
                                 <p className="text-red-700 text-sm leading-6">
-                                    If you&apos;re experiencing a medical emergency,
-                                    please call <strong>1990</strong> (Ambulance
-                                    Service) or visit the nearest hospital
-                                    emergency room immediately.
+                                    If you&apos;re experiencing a medical
+                                    emergency, please call <strong>1990</strong>{" "}
+                                    (Ambulance Service) or visit the nearest
+                                    hospital emergency room immediately.
                                 </p>
                             </div>
                         </div>
