@@ -29,11 +29,12 @@ const Navbar = () => {
     const isActive = pathname;
 
     //get auth status and hydration state
-    const { userToken, isLoginSuccess, isHydrated } = useSelector(
-        (state: RootState) => state.auth,
-    );
+    const { userToken, isLoginSuccess, isSignupSuccess, isHydrated } =
+        useSelector((state: RootState) => state.auth);
     const isAuthenticated =
-        isLoginSuccess && userToken && Object.keys(userToken).length > 0;
+        (isLoginSuccess || isSignupSuccess) &&
+        userToken &&
+        Object.keys(userToken).length > 0;
 
     // Get user data from user slice
     const { user } = useSelector((state: RootState) => state.user);

@@ -170,7 +170,7 @@ export const signup = createAsyncThunk<
         return rejectWithValue(
             err.response?.data?.error || "An error occurred during signup.",
         );
-    }
+    }   
 });
 
 // login
